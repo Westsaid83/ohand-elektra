@@ -38,6 +38,55 @@ LOGO = ('<svg viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36
         '<path d="M12.6 11.9a9 9 0 1 0 10.8 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square"/>'
         '<path d="M18 7.5v10" stroke="#ffc533" stroke-width="2.6" stroke-linecap="square"/></svg>')
 
+
+# Eigen lijnpictogrammen (24x24). Eén plek, zodat menu, tegels en het
+# stappenformulier dezelfde tekens gebruiken.
+ICON_PATHS = {
+    "laadpaal": '<rect x="6" y="3" width="9" height="13" rx="2"/><path d="M9 7.5h3M10.5 16v5M7 21h7M15 9h2a2 2 0 0 1 2 2v4"/>',
+    "batterij": '<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10.5v3M7 10.5v3M10.5 10.5v3"/>',
+    "kast": '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7v4M12 7v4M16 7v4M8 15h8"/>',
+    "verbouwing": '<path d="M14 6l4 4M3 21l9.5-9.5M12.5 4.5l7 7-2.5 2.5-7-7z"/>',
+    "zakelijk": '<path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M14 10h5a1 1 0 0 1 1 1v10M3 21h18M8 8h2M8 12h2M8 16h2"/>',
+    "vraag": '<path d="M4 5h16v11H9l-5 4z"/><path d="M9 9.5h6M9 12.5h4"/>',
+    "zon": '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/>',
+    "balans": '<path d="M12 4v16M5 20h14M4 8h16M4 8l-2 6a3 3 0 0 0 6 0zM20 8l-2 6a3 3 0 0 0 6 0z" transform="scale(.9) translate(1.3 1.3)"/>',
+    "fase": '<path d="M13 2L5 13.5h6L10 22l8-11.5h-6z"/>',
+    "reken": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.5 12h1M12 12h1M15.5 12h0M8.5 16h1M12 16h1M15.5 16h0"/>',
+    "stekker": '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+    "tel": '<path d="M5 4h4l1.5 4.5-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2L20 15v4a1 1 0 0 1-1 1A15 15 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
+    "persoon": '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
+    "offerte": '<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h4"/>',
+    "norm": '<path d="M12 3l7 3v5.5c0 4.5-3 7.8-7 9.5-4-1.7-7-5-7-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.6"/>',
+    "net": '<path d="M5 20l3-13h8l3 13M7 12h10M4 20h16"/>',
+}
+
+
+def icon(naam):
+    return ('<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+            f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICON_PATHS[naam]}</svg>')
+
+
+# Alle diensten: (pictogram, naam, adres). Gebruikt door het menu en het dienstenraster.
+DIENSTEN = [
+    ("laadpaal", "Laadpaal thuis", "laadpaal-installeren/"),
+    ("zakelijk", "Laadpaal voor bedrijf en VvE", "laadpaal-installeren/#bedrijf"),
+    ("zon", "Laden op zonnestroom", "laadpaal-installeren/#zonnestroom"),
+    ("balans", "Load balancing", "laadpaal-installeren/#load-balancing"),
+    ("batterij", "Thuisbatterij plaatsen", "thuisbatterij/"),
+    ("stekker", "Plug & play batterij", "thuisbatterij/#plug-en-play"),
+    ("reken", "Thuisbatterij berekenen", "thuisbatterij/#configurator"),
+    ("kast", "Groepenkast vervangen", "elektra/#groepenkast"),
+    ("fase", "Van 1-fase naar 3-fase", "elektra/#drie-fase"),
+    ("verbouwing", "Elektra bij verbouwing", "elektra/#verbouwing"),
+    ("net", "Zakelijke installaties", "elektra/#zakelijk"),
+]
+
+
+def diensten_raster():
+    return '<div class="svc-grid reveal">' + ''.join(
+        f'<a class="svc" href="{{base}}{href}">{icon(ic)}<span>{naam}</span></a>' for ic, naam, href in DIENSTEN) + '</div>'
+
+
 NAV = [
     ("laadpaal-installeren/", "Laadpalen"),
     ("thuisbatterij/", "Thuisbatterijen"),
@@ -124,6 +173,7 @@ def layout(page):
     canonical = SITE_URL + path
     nav = ''.join(
         f'<a href="{base}{href}"{" aria-current=\"page\"" if href == path else ""}>{label}</a>' for href, label in NAV)
+    drop = ''.join(f'<a href="{base}{href}">{icon(ic)}<span>{naam}</span></a>' for ic, naam, href in DIENSTEN)
     graph = [business_ld(), {"@type": "WebSite", "@id": SITE_URL + "#site", "url": SITE_URL, "name": BEDRIJF["naam"], "inLanguage": "nl-NL"}]
     if path:
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
@@ -175,9 +225,13 @@ def layout(page):
     <a class="brand" href="{base or "./"}" aria-label="{b["naam"]}, naar de homepage">{LOGO}<span>Ohand<span>Elektra</span></span></a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
     <nav class="nav" id="nav" aria-label="Hoofdmenu">
+      <div class="drop">
+        <button class="drop-btn" type="button" aria-expanded="false" aria-controls="drop-diensten">Diensten</button>
+        <div class="drop-menu" id="drop-diensten">{drop}</div>
+      </div>
       {nav}
-      <a class="nav-tel" href="tel:{b["telefoon_link"]}">{b["telefoon_tekst"]}</a>
-      <a class="btn btn--primary" href="{"#contact" if page.get("contact", True) else base + "#contact"}">Offerte aanvragen</a>
+      <a href="{"#contact" if page.get("contact", True) else base + "#contact"}">Contact</a>
+      <a class="btn btn--call" href="tel:{b["telefoon_link"]}">{icon("tel")}<span>{b["telefoon_tekst"]}</span></a>
     </nav>
   </div>
   <span class="wires" aria-hidden="true"></span>
@@ -186,6 +240,10 @@ def layout(page):
 {body}
 {contact.replace("{base}", base)}
 </main>
+<div class="callbar">
+  <a class="btn btn--call" href="tel:{b["telefoon_link"]}">{icon("tel")}<span>Bel direct</span></a>
+  <a class="btn btn--primary" href="{"#contact" if page.get("contact", True) else base + "#contact"}">Offerte aanvragen</a>
+</div>
 <footer class="site-footer">
   <div class="wrap">
     <div class="foot-grid">
@@ -245,20 +303,110 @@ FAQ_HOME = [
 
 HOME = f'''
 <section class="hero">
-  <div class="wrap">
-    <h1>Laadpaal, thuisbatterij en elektra. Vakkundig aangesloten.</h1>
-    <p class="lead">Ohand Elektra zorgt dat uw meterkast klaar is voor laden, opslaan en alles wat erbij komt. U spreekt met de vakman die het werk ook uitvoert.</p>
-    <div class="btn-row">
-      <a class="btn btn--primary" href="{{base}}thuisbatterij/#configurator">Bereken uw thuisbatterij</a>
-      <a class="btn btn--ghost" href="#contact">Offerte aanvragen</a>
+  {img("laadpaal-oprit", "", "100vw", 1200, 801, lazy=False).replace("<img ", '<img class="hero-bg" ')}
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="place">{icon("norm")} Gevestigd in Ede</p>
+      <h1>Elektricien voor laadpalen, thuisbatterijen en groepenkasten</h1>
+      <p class="lead">Wij maken uw woning klaar voor elektrisch rijden en eigen stroom. Van de eerste controle van uw meterkast tot een geteste installatie.</p>
+      <ul class="ticks">
+        <li>U spreekt met de vakman die het werk uitvoert</li>
+        <li>Heldere offerte vooraf</li>
+        <li>Werk volgens de geldende normen</li>
+        <li>Eerlijk advies, ook als iets voor u niet loont</li>
+      </ul>
     </div>
+
+    <form class="wiz" id="wiz" data-to="{BEDRIJF["email"]}" novalidate>
+      <div class="wiz-top"><span id="wiz-stap">Stap 1 van 4</span><span class="wiz-bar"><i id="wiz-bar"></i></span></div>
+
+      <fieldset class="wiz-step is-on" data-step="1">
+        <legend>Waarmee kunnen wij u helpen?</legend>
+        <p class="wiz-sub">Kies wat het beste past. In vier korte stappen staat uw aanvraag klaar.</p>
+        <label class="opt"><input type="radio" name="dienst" value="Laadpaal">{icon("laadpaal")}<span><b>Laadpaal</b><small>thuis of op de zaak</small></span></label>
+        <label class="opt"><input type="radio" name="dienst" value="Thuisbatterij">{icon("batterij")}<span><b>Thuisbatterij</b><small>vast of plug & play</small></span></label>
+        <label class="opt"><input type="radio" name="dienst" value="Groepenkast">{icon("kast")}<span><b>Groepenkast of 3-fase</b><small>vervangen, uitbreiden, verzwaren</small></span></label>
+        <label class="opt"><input type="radio" name="dienst" value="Elektra bij verbouwing">{icon("verbouwing")}<span><b>Elektra bij verbouwing</b><small>bedrading, stopcontacten, verlichting</small></span></label>
+        <label class="opt"><input type="radio" name="dienst" value="Zakelijk project">{icon("zakelijk")}<span><b>Zakelijk project</b><small>aannemer, beheerder, VvE</small></span></label>
+        <label class="opt"><input type="radio" name="dienst" value="Iets anders">{icon("vraag")}<span><b>Iets anders</b><small>of ik weet het nog niet</small></span></label>
+      </fieldset>
+
+      <fieldset class="wiz-step" data-step="2">
+        <legend id="wiz-q2">Vertel iets meer</legend>
+        <p class="wiz-sub" id="wiz-q2-sub"></p>
+        <div id="wiz-opties"></div>
+      </fieldset>
+
+      <fieldset class="wiz-step" data-step="3">
+        <legend>Wanneer wilt u het laten uitvoeren?</legend>
+        <p class="wiz-sub">Zo weten wij hoe wij uw aanvraag moeten inplannen.</p>
+        <label class="opt"><input type="radio" name="wanneer" value="Zo snel mogelijk"><span><b>Zo snel mogelijk</b></span></label>
+        <label class="opt"><input type="radio" name="wanneer" value="Binnen drie maanden"><span><b>Binnen drie maanden</b></span></label>
+        <label class="opt"><input type="radio" name="wanneer" value="Later dit jaar"><span><b>Later dit jaar</b></span></label>
+        <label class="opt"><input type="radio" name="wanneer" value="Ik oriënteer mij nog"><span><b>Ik oriënteer mij nog</b></span></label>
+      </fieldset>
+
+      <fieldset class="wiz-step" data-step="4">
+        <legend>Hoe bereiken wij u?</legend>
+        <p class="wiz-sub" id="wiz-samenvatting"></p>
+        <div class="field"><label for="w-naam">Naam</label><input id="w-naam" name="naam" type="text" autocomplete="name" required></div>
+        <div class="field"><label for="w-tel">Telefoonnummer</label><input id="w-tel" name="telefoon" type="tel" autocomplete="tel" required></div>
+        <div class="field"><label for="w-postcode">Postcode</label><input id="w-postcode" name="postcode" type="text" autocomplete="postal-code"></div>
+        <button class="btn btn--primary" type="submit">Aanvraag opstellen in e-mail</button>
+        <p class="fine" id="wiz-status" role="status">Uw e-mailprogramma opent met een ingevuld bericht. Daar kunt u ook foto's van uw meterkast toevoegen.</p>
+      </fieldset>
+
+      <div class="wiz-foot">
+        <button class="wiz-terug" type="button" id="wiz-terug" hidden>Vorige stap</button>
+        <a class="wiz-bel" href="tel:{BEDRIJF["telefoon_link"]}">{icon("tel")} Liever bellen: {BEDRIJF["telefoon_tekst"]}</a>
+      </div>
+    </form>
   </div>
-  <div class="stage" data-scene-wrap>
-    <canvas data-scene="hero" data-wallbox="1" data-modules="4" role="img" aria-label="Driedimensionaal model van een thuisbatterij met vier modules en een laadpaal"></canvas>
+</section>
+
+<section class="trust" aria-label="Zo werkt Ohand Elektra">
+  <div class="wrap trust-grid">
+    <div>{icon("persoon")}<b>Eén aanspreekpunt</b><span>van eerste vraag tot oplevering</span></div>
+    <div>{icon("offerte")}<b>Heldere offerte</b><span>werk, planning en prijs vooraf</span></div>
+    <div>{icon("norm")}<b>Volgens de normen</b><span>gecontroleerd vóór oplevering</span></div>
+    <div>{icon("kast")}<b>Nette afwerking</b><span>strakke bedrading, opgeruimde werkplek</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="center reveal">
+      <h2>Drie dingen doen wij het meest</h2>
+      <p class="lead">Alle drie beginnen bij dezelfde vraag: kan uw installatie het aan?</p>
+    </div>
+    <div class="cards">
+      <a class="card reveal" href="{{base}}laadpaal-installeren/">
+        {img("laadpaal-gevel", "", "(max-width: 900px) 100vw, 33vw", 800, 1200)}
+        <div class="card-body">{icon("laadpaal")}<h3>Laadpaal installeren</h3><p>Eigen groep, de juiste beveiliging en load balancing, zodat laden en koken samen kunnen.</p><span class="go">Alles over laadpalen</span></div>
+      </a>
+      <a class="card reveal" href="{{base}}thuisbatterij/">
+        {img("thuisbatterij", "", "(max-width: 900px) 100vw, 33vw")}
+        <div class="card-body">{icon("batterij")}<h3>Thuisbatterij</h3><p>Vast geplaatst of plug & play. Eerst doorgerekend met uw eigen verbruik, dan pas geadviseerd.</p><span class="go">Bereken uw batterij</span></div>
+      </a>
+      <a class="card reveal" href="{{base}}elektra/">
+        {img("groepenkast-detail", "", "(max-width: 900px) 100vw, 33vw")}
+        <div class="card-body">{icon("kast")}<h3>Groepenkast en elektra</h3><p>Vervangen, uitbreiden of verzwaren naar 3-fase, en de complete installatie bij een verbouwing.</p><span class="go">Alle elektrawerkzaamheden</span></div>
+      </a>
+    </div>
   </div>
 </section>
 
 <section class="section section--mist">
+  <div class="wrap">
+    <div class="center reveal">
+      <h2>Alle diensten</h2>
+      <p class="lead">Kies direct waar het om gaat.</p>
+    </div>
+    {diensten_raster()}
+  </div>
+</section>
+
+<section class="section">
   <div class="wrap">
     <div class="center reveal">
       <h2>Welke thuisbatterij past bij u?</h2>
@@ -285,57 +433,15 @@ HOME = f'''
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap">
-    <div class="center reveal">
-      <h2>Waarmee kunnen wij u helpen?</h2>
-      <p class="lead">Alles begint bij dezelfde vraag: kan uw installatie het aan?</p>
-    </div>
-    <div class="bento">
-      <a class="tile tile--photo tile--wide reveal" href="{{base}}laadpaal-installeren/">
-        {img("laadpaal-oprit", "", "(max-width: 900px) 100vw, 66vw", 1200, 801)}
-        <div class="tile-body"><h3>Laadpaal installeren</h3><p>Eigen groep, de juiste beveiliging en load balancing, zodat laden en koken samen kunnen.</p><span class="go">Alles over laadpalen</span></div>
-      </a>
-      <a class="tile tile--photo reveal" href="{{base}}thuisbatterij/">
-        {img("thuisbatterij", "", "(max-width: 900px) 100vw, 33vw")}
-        <div class="tile-body"><h3>Thuisbatterij</h3><p>Vast geplaatst of plug & play. Eerst doorgerekend, dan pas geadviseerd.</p><span class="go">Bereken uw batterij</span></div>
-      </a>
-      <a class="tile tile--photo tile--half reveal" href="{{base}}elektra/">
-        {img("groepenkast-detail", "", "(max-width: 900px) 100vw, 50vw")}
-        <div class="tile-body"><h3>Groepenkast en elektra</h3><p>Vervangen, uitbreiden, en de complete installatie bij een verbouwing.</p><span class="go">Alle elektrawerkzaamheden</span></div>
-      </a>
-      <a class="tile tile--volt tile--half reveal" href="{{base}}thuisbatterij/#configurator">
-        <div class="tile-body"><span class="tile-num">Vast of plug & play?</span><p>Een stekkerbatterij kan ook zonder zonnepanelen. Of dat loont, hangt af van uw contract. De configurator zet beide naast elkaar.</p><span class="go">Vergelijk de twee</span></div>
-      </a>
-      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">11 kW</span><p>Laden op een 3-fase aansluiting: ongeveer 60 kilometer bereik per uur.</p></div></div>
-      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">800 W</span><p>Wat de meeste stekkerbatterijen leveren. Genoeg voor koelkast en sluipverbruik, niet voor de kookplaat.</p></div></div>
-      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">1</span><p>Vast aanspreekpunt, van uw eerste vraag tot de oplevering.</p></div></div>
-    </div>
-  </div>
-</section>
-
 <section class="section section--ink">
-  <div class="wrap center reveal">
-    <p class="bigfact" aria-hidden="true">2027</p>
-    <h2>Salderen stopt. Zelf gebruiken loont.</h2>
-    <p class="lead">Vanaf 1 januari 2027 mag u teruggeleverde stroom niet meer wegstrepen tegen wat u afneemt. Wat uw panelen overdag opwekken, wilt u dus zelf gebruiken: in de avond, voor de auto of voor de warmtepomp.</p>
-    <div class="btn-row"><a class="btn btn--primary" href="{{base}}thuisbatterij/#configurator">Reken uw situatie door</a></div>
-  </div>
-</section>
-
-<section class="explode" aria-labelledby="opbouw-kop">
-  <div class="wrap explode-intro center reveal">
-    <h2 id="opbouw-kop">Zo zit een thuisbatterij in elkaar</h2>
-    <p class="lead">Scroll verder en het model schuift open.</p>
-  </div>
-  <div class="wrap explode-grid">
-    <div class="explode-stage" data-scene-wrap>
-      <canvas data-scene="opbouw" data-modules="4" data-pointer="0" role="img" aria-label="Opengewerkt model van een thuisbatterij: omvormer bovenop, daaronder vier batterijmodules"></canvas>
+  <div class="wrap split reveal">
+    <div>
+      <p class="bigfact" aria-hidden="true">2027</p>
     </div>
-    <div class="explode-steps" id="opbouw-stappen">
-      <article class="is-on"><h2>De omvormer bovenop</h2><p class="lead">Een batterij slaat gelijkstroom op, uw huis gebruikt wisselstroom. De omvormer zet het om, in beide richtingen.</p></article>
-      <article><h2>Modules die u stapelt</h2><p class="lead">De capaciteit groeit per module. Daardoor past een batterij bij uw verbruik van nu, en kunt u bij veel systemen later uitbreiden.</p></article>
-      <article><h2>Een meter die meekijkt</h2><p class="lead">Een meter in de meterkast ziet of u stroom teruglevert of afneemt. Bij overschot laadt de batterij, bij vraag levert hij.</p></article>
+    <div>
+      <h2>Salderen stopt. Zelf gebruiken loont.</h2>
+      <p class="lead">Vanaf 1 januari 2027 mag u teruggeleverde stroom niet meer wegstrepen tegen wat u afneemt. Wat uw panelen overdag opwekken, wilt u dus zelf gebruiken: in de avond, voor de auto of voor de warmtepomp.</p>
+      <div class="btn-row"><a class="btn btn--primary" href="{{base}}thuisbatterij/#configurator">Reken uw situatie door</a></div>
     </div>
   </div>
 </section>
@@ -344,7 +450,7 @@ HOME = f'''
   <div class="wrap">
     <div class="center reveal"><h2>Van uw vraag naar een veilige installatie</h2></div>
     <ol class="steps">
-      <li><h3>U vertelt wat u nodig heeft</h3><p>Bel, mail of vul het formulier in. Een korte omschrijving is genoeg. Foto's van uw meterkast helpen ons op weg.</p></li>
+      <li><h3>U vertelt wat u nodig heeft</h3><p>Via het formulier bovenaan, per mail of telefonisch. Een korte omschrijving is genoeg. Foto's van uw meterkast helpen ons op weg.</p></li>
       <li><h3>Wij maken een passend voorstel</h3><p>We bespreken de mogelijkheden, komen zo nodig langs en zetten werk, planning en prijs helder op een rij.</p></li>
       <li><h3>Na akkoord plannen we het werk</h3><p>U weet vooraf wanneer we komen en hoelang het duurt. Na afloop lopen we de installatie samen met u door.</p></li>
     </ol>
@@ -352,18 +458,6 @@ HOME = f'''
 </section>
 
 <section class="section section--mist">
-  <div class="wrap">
-    <h2 class="reveal">Zo werkt Ohand Elektra</h2>
-    <dl class="facts">
-      <div><dt>Persoonlijk contact</dt><dd>Eén aanspreekpunt, van de eerste vraag tot de oplevering. U spreekt met de vakman die het werk uitvoert.</dd></div>
-      <div><dt>Duidelijke afspraken</dt><dd>Vooraf een heldere offerte: wat we doen, wanneer we komen en wat het kost.</dd></div>
-      <div><dt>Vakkundige installatie</dt><dd>Wij werken volgens de geldende normen en controleren de installatie voordat we deze opleveren.</dd></div>
-      <div><dt>Nette afwerking</dt><dd>Strakke bedrading, een overzichtelijke meterkast en een opgeruimde werkplek als we vertrekken.</dd></div>
-    </dl>
-  </div>
-</section>
-
-<section class="section">
   <div class="wrap">
     <h2 class="center reveal">Veelgestelde vragen</h2>
     {faq_html(FAQ_HOME)}
@@ -420,7 +514,17 @@ LAADPAAL = f'''
   </div>
 </section>
 
-<section class="section section--mist" id="vermogen">
+<section class="section section--mist">
+  <div class="wrap">
+    <div class="tri">
+      <article id="load-balancing" class="reveal">{icon("balans")}<h3>Load balancing</h3><p>Een meter in de meterkast ziet hoeveel stroom uw huis op dat moment gebruikt. De laadpaal neemt wat er over is. Zo valt de hoofdzekering niet uit als u tegelijk kookt en laadt.</p></article>
+      <article id="zonnestroom" class="reveal">{icon("zon")}<h3>Laden op zonnestroom</h3><p>Veel laadpalen kunnen laden met wat uw panelen op dat moment overhouden. Wij koppelen de laadpaal aan de meting, zodat uw auto vooral op eigen stroom laadt.</p></article>
+      <article id="bedrijf" class="reveal">{icon("zakelijk")}<h3>Voor bedrijf en VvE</h3><p>Meerdere laadpunten op één aansluiting, met verdeling van het vermogen over de laadpunten en zo nodig verrekening per gebruiker.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="vermogen">
   <div class="wrap">
     <h2 class="reveal">Welk laadvermogen past bij uw aansluiting?</h2>
     <p class="lead">Uw aansluiting bepaalt hoe snel u thuis kunt laden. Op uw slimme meter of in de meterkast staat welke u heeft. Weet u het niet? Stuur een foto mee.</p>
@@ -438,7 +542,7 @@ LAADPAAL = f'''
   </div>
 </section>
 
-<section class="section">
+<section class="section section--mist">
   <div class="wrap">
     <h2 class="reveal">In drie stappen een werkende laadpaal</h2>
     <ol class="steps">
@@ -449,7 +553,7 @@ LAADPAAL = f'''
   </div>
 </section>
 
-<section class="section section--mist">
+<section class="section">
   <div class="wrap">
     <h2 class="reveal">Veelgestelde vragen over laadpalen</h2>
     {faq_html(FAQ_LAADPAAL)}
@@ -652,7 +756,39 @@ BATTERIJ = f'''
   </div>
 </section>
 
-<section class="section section--mist">
+<section class="section section--mist" id="plug-en-play">
+  <div class="wrap">
+    <div class="center reveal">
+      <h2>Vast geplaatst of plug & play?</h2>
+      <p class="lead">Twee manieren om stroom op te slaan. Welke past, hangt af van uw verbruik en uw woning.</p>
+    </div>
+    <div class="duo">
+      <article class="reveal">{icon("batterij")}<h3>Vaste thuisbatterij</h3>
+        <ul class="ticks"><li>5 tot 20 kWh, uit te breiden per module</li><li>Eigen groep, geplaatst door de installateur</li><li>Genoeg vermogen voor het hele huis</li><li>Mogelijk met noodstroomfunctie</li></ul></article>
+      <article class="reveal">{icon("stekker")}<h3>Plug & play batterij</h3>
+        <ul class="ticks"><li>Ongeveer 1,5 tot 5 kWh</li><li>In een stopcontact, ook in een huurwoning</li><li>Levert meestal maximaal 800 watt</li><li>Werkt ook zonder zonnepanelen, met een dynamisch contract</li></ul></article>
+    </div>
+  </div>
+</section>
+
+<section class="explode" aria-labelledby="opbouw-kop">
+  <div class="wrap explode-intro center reveal">
+    <h2 id="opbouw-kop">Zo zit een vaste thuisbatterij in elkaar</h2>
+    <p class="lead">Scroll verder en het model schuift open.</p>
+  </div>
+  <div class="wrap explode-grid">
+    <div class="explode-stage" data-scene-wrap>
+      <canvas data-scene="opbouw" data-modules="4" data-pointer="0" role="img" aria-label="Opengewerkt model van een thuisbatterij: omvormer bovenop, daaronder vier batterijmodules"></canvas>
+    </div>
+    <div class="explode-steps" id="opbouw-stappen">
+      <article class="is-on"><h2>De omvormer bovenop</h2><p class="lead">Een batterij slaat gelijkstroom op, uw huis gebruikt wisselstroom. De omvormer zet het om, in beide richtingen.</p></article>
+      <article><h2>Modules die u stapelt</h2><p class="lead">De capaciteit groeit per module. Daardoor past een batterij bij uw verbruik van nu, en kunt u bij veel systemen later uitbreiden.</p></article>
+      <article><h2>Een meter die meekijkt</h2><p class="lead">Een meter in de meterkast ziet of u stroom teruglevert of afneemt. Bij overschot laadt de batterij, bij vraag levert hij.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
   <div class="wrap">
     <h2 class="reveal">Van berekening naar werkende batterij</h2>
     <ol class="steps">
@@ -663,7 +799,7 @@ BATTERIJ = f'''
   </div>
 </section>
 
-<section class="section">
+<section class="section section--mist">
   <div class="wrap">
     <h2 class="reveal">Veelgestelde vragen over thuisbatterijen</h2>
     {faq_html(FAQ_BATTERIJ)}
@@ -709,6 +845,23 @@ ELEKTRA = f'''
       </ul>
     </div>
     {img("groepenkast", "Nieuwe groepenkast met automaten")}
+  </div>
+</section>
+
+<section class="section section--ink" id="drie-fase">
+  <div class="wrap split reveal">
+    <div>
+      <h2>Van 1-fase naar 3-fase</h2>
+      <p class="lead">Een laadpaal van 11 kW, een inductiekookplaat of een warmtepomp vraagt vaak om een 3-fase aansluiting.</p>
+    </div>
+    <div>
+      <ul class="ticks">
+        <li>Wij beoordelen of verzwaren voor u nodig is</li>
+        <li>U vraagt de verzwaring aan bij uw netbeheerder; wij helpen u daarbij</li>
+        <li>Wij maken uw groepenkast klaar voor de nieuwe aansluiting</li>
+        <li>Na de omzetting verdelen wij de groepen over de drie fasen</li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -785,9 +938,9 @@ NOTFOUND = '''
 CALC = ["calc.js", "site.js"]
 
 PAGES = [
-    dict(path="", base="", crumb="Home", scripts=CALC, scene=True,
-         title="Ohand Elektra | Laadpaal, thuisbatterij en elektra laten installeren",
-         description="Elektricien voor laadpalen, thuisbatterijen, groepenkasten en elektra. Bereken welke thuisbatterij bij u past en vraag een heldere offerte aan.",
+    dict(path="", base="", crumb="Home", scripts=CALC,
+         title="Ohand Elektra | Elektricien in Ede voor laadpaal, thuisbatterij en groepenkast",
+         description="Elektricien uit Ede voor laadpalen, thuisbatterijen en groepenkasten. Bereken welke thuisbatterij bij u past en vraag in vier stappen een offerte aan.",
          body=HOME, ld=[faq_ld(FAQ_HOME)]),
     dict(path="laadpaal-installeren/", base="../", crumb="Laadpaal installeren", onderwerp="Laadpaal",
          title="Laadpaal laten installeren | Ohand Elektra",
