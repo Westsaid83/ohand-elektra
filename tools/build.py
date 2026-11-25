@@ -16,16 +16,22 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # pas dan alleen deze regel aan.
 SITE_URL = "https://westsaid83.github.io/ohand-elektra/"
 
-# TODO Said: telefoon, adres en KvK zijn nog de plaatshouders van de oude site.
+# Aangeleverd door Said op 25 november 2026, van een factuur van het bedrijf.
+# Het e-mailadres blijft bewust info@ohandelektra.nl.
 BEDRIJF = {
     "naam": "Ohand Elektra",
-    "telefoon_tekst": "085 000 00 00",
-    "telefoon_link": "+31850000000",
+    "telefoon_tekst": "06 84 86 13 58",
+    "telefoon_link": "+31684861358",
     "email": "info@ohandelektra.nl",
-    "adres": "Straatnaam 1, 1234 AB Plaatsnaam",
-    "kvk": "00000000",
+    "straat": "Vanenburg 13 B",
+    "postcode": "6714 HG",
+    "plaats": "Ede",
+    "adres": "Vanenburg 13 B, 6714 HG Ede",
+    "kvk": "69415471",
+    "btw": "NL001556853B46",
+    "iban": "NL87 INGB 0006 7063 92",
     "uren": "Maandag t/m vrijdag, 08.00 tot 17.00 uur",
-    "gegevens_definitief": False,  # zet op True zodra telefoon/adres/KvK echt zijn
+    "gegevens_definitief": True,
 }
 
 LOGO = ('<svg viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" fill="#0f2231"/>'
@@ -70,7 +76,9 @@ def business_ld():
     }
     if BEDRIJF["gegevens_definitief"]:
         d["telephone"] = BEDRIJF["telefoon_link"]
-        d["address"] = BEDRIJF["adres"]
+        d["address"] = {"@type": "PostalAddress", "streetAddress": BEDRIJF["straat"], "postalCode": BEDRIJF["postcode"],
+                        "addressLocality": BEDRIJF["plaats"], "addressCountry": "NL"}
+        d["vatID"] = BEDRIJF["btw"]
     return d
 
 
@@ -88,6 +96,7 @@ def contact_block(onderwerp="Laadpaal"):
       <ul class="contact-list">
         <li><span>Bellen</span><a href="tel:{b["telefoon_link"]}">{b["telefoon_tekst"]}</a></li>
         <li><span>Mailen</span><a href="mailto:{b["email"]}">{b["email"]}</a></li>
+        <li><span>Adres</span><b>{b["adres"]}</b></li>
         <li><span>Bereikbaar</span><b>{b["uren"]}</b></li>
       </ul>
     </div>
@@ -201,6 +210,8 @@ def layout(page):
           <li><a href="mailto:{b["email"]}">{b["email"]}</a></li>
           <li>{b["adres"]}</li>
           <li>KvK {b["kvk"]}</li>
+          <li>Btw {b["btw"]}</li>
+          <li>IBAN {b["iban"]}</li>
         </ul>
       </div>
     </div>
