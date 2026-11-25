@@ -13,9 +13,9 @@ Dat schrijft `index.html`, `laadpaal-installeren/`, `thuisbatterij/`,
 opnieuw. De gebouwde bestanden worden wél gecommit, want Pages serveert ze
 rechtstreeks.
 
-- Bedrijfsgegevens: `BEDRIJF` bovenaan `tools/build.py`. Telefoon, adres en
-  KvK zijn plaatshouders tot Said de echte aanlevert; zet daarna
-  `gegevens_definitief` op `True`, dan komen ze ook in de JSON-LD.
+- Bedrijfsgegevens: `BEDRIJF` bovenaan `tools/build.py`. Telefoon, adres,
+  KvK, btw-nummer en IBAN zijn door Said aangeleverd op 25 november 2026 en
+  staan ook in de JSON-LD. Het e-mailadres blijft `info@ohandelektra.nl`.
 - Adres van de site: `SITE_URL`. Bij een eigen domein alleen die regel
   aanpassen (canonical, sitemap, Open Graph en de 404 volgen vanzelf).
 - Stijl: `assets/site.css`. Gedrag: `assets/site.js`.
