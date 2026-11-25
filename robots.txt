@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://westsaid83.github.io/ohand-elektra/sitemap.xml
