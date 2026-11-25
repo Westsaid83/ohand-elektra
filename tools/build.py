@@ -92,11 +92,11 @@ def contact_block(onderwerp="Laadpaal"):
       </ul>
     </div>
     <form class="contact-form" id="contact-form" data-to="{b["email"]}" novalidate>
-      <div class="two">
+      <div class="two-col">
         <div class="field"><label for="c-naam">Naam</label><input id="c-naam" name="naam" type="text" autocomplete="name" required></div>
         <div class="field"><label for="c-telefoon">Telefoonnummer</label><input id="c-telefoon" name="telefoon" type="tel" autocomplete="tel"></div>
       </div>
-      <div class="two">
+      <div class="two-col">
         <div class="field"><label for="c-email">E-mailadres</label><input id="c-email" name="email" type="email" autocomplete="email" required></div>
         <div class="field"><label for="c-postcode">Postcode</label><input id="c-postcode" name="postcode" type="text" autocomplete="postal-code"></div>
       </div>
@@ -123,14 +123,24 @@ def layout(page):
     graph += page.get("ld", [])
     ld = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False)
     scripts = ''.join(f'<script src="{base}assets/{s}" defer></script>' for s in page.get("scripts", ["site.js"]))
+    if page.get("scene"):
+        # Het 3D-model is een ES-module en laadt na de rest; de importmap wijst 'three' naar de eigen kopie.
+        scripts += (f'<script type="importmap">{{"imports":{{"three":"{base or "./"}assets/vendor/three.module.min.js"}}}}</script>'
+                    f'<script type="module" src="{base}assets/scene.js"></script>')
     b = BEDRIJF
     robots = '<meta name="robots" content="noindex">' if page.get("noindex") else ''
     body = page["body"].replace("{base}", base)
+    # Blokken die bij het scrollen binnenkomen (zie .reveal in site.css).
+    for oud, nieuw in (('class="wrap split', 'class="wrap split reveal'), ('<ol class="steps">', '<ol class="steps reveal">'),
+                       ('<div class="faq">', '<div class="faq reveal">'), ('<dl class="facts">', '<dl class="facts reveal">'),
+                       ('<div class="table-scroll">', '<div class="table-scroll reveal">')):
+        body = body.replace(oud, nieuw)
     contact = contact_block(page.get("onderwerp", "Laadpaal")) if page.get("contact", True) else ''
     return f'''<!doctype html>
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.className="js"</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{page["title"]}</title>
 <meta name="description" content="{page["description"]}">
@@ -224,95 +234,104 @@ FAQ_HOME = [
 
 HOME = f'''
 <section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <h1>Elektricien voor laadpalen, thuisbatterijen en elektra</h1>
-      <p class="lead">Ohand Elektra sluit uw laadpaal of thuisbatterij veilig aan en zorgt dat uw meterkast erop berekend is. U spreekt met de vakman die het werk ook uitvoert.</p>
-      <div class="btn-row">
-        <a class="btn btn--primary" href="#contact">Offerte aanvragen</a>
-        <a class="btn btn--ghost" href="{{base}}thuisbatterij/#configurator">Bereken uw thuisbatterij</a>
-      </div>
-      <ul class="hero-facts">
-        <li>Eén vast aanspreekpunt</li>
-        <li>Heldere offerte vooraf</li>
-        <li>Werk volgens de geldende normen</li>
-      </ul>
+  <div class="wrap">
+    <h1>Laadpaal, thuisbatterij en elektra. Vakkundig aangesloten.</h1>
+    <p class="lead">Ohand Elektra zorgt dat uw meterkast klaar is voor laden, opslaan en alles wat erbij komt. U spreekt met de vakman die het werk ook uitvoert.</p>
+    <div class="btn-row">
+      <a class="btn btn--primary" href="{{base}}thuisbatterij/#configurator">Bereken uw thuisbatterij</a>
+      <a class="btn btn--ghost" href="#contact">Offerte aanvragen</a>
     </div>
-    <div class="quick" id="quick">
+  </div>
+  <div class="stage" data-scene-wrap>
+    <canvas data-scene="hero" data-wallbox="1" data-modules="4" role="img" aria-label="Driedimensionaal model van een thuisbatterij met vier modules en een laadpaal"></canvas>
+  </div>
+</section>
+
+<section class="section section--mist">
+  <div class="wrap">
+    <div class="center reveal">
       <h2>Welke thuisbatterij past bij u?</h2>
-      <p class="sub">Schuif naar uw situatie en zie direct een indicatie.</p>
-      <div class="field">
-        <label for="q-verbruik">Stroomverbruik per jaar <output id="q-verbruik-out" for="q-verbruik"></output></label>
-        <input type="range" id="q-verbruik" min="1500" max="10000" step="100" value="3500">
-      </div>
-      <div class="field">
-        <label for="q-panelen">Zonnepanelen <output id="q-panelen-out" for="q-panelen"></output></label>
-        <input type="range" id="q-panelen" min="0" max="36" step="1" value="12">
+      <p class="lead">Twee schuiven, direct een indicatie.</p>
+    </div>
+    <div class="quick reveal" id="quick">
+      <div>
+        <div class="field">
+          <label for="q-verbruik">Stroomverbruik per jaar <output id="q-verbruik-out" for="q-verbruik"></output></label>
+          <input type="range" id="q-verbruik" min="1500" max="10000" step="100" value="3500">
+        </div>
+        <div class="field">
+          <label for="q-panelen">Zonnepanelen <output id="q-panelen-out" for="q-panelen"></output></label>
+          <input type="range" id="q-panelen" min="0" max="36" step="1" value="12">
+        </div>
+        <a class="btn btn--primary" id="q-link" href="{{base}}thuisbatterij/#configurator">Volledige berekening</a>
+        <p class="fine" id="q-note"></p>
       </div>
       <div class="quick-out" aria-live="polite">
         <div><strong id="q-cap">–</strong><span>passende capaciteit</span></div>
         <div><strong id="q-save">–</strong><span>geschatte besparing per jaar</span></div>
       </div>
-      <a class="btn btn--primary" id="q-link" href="{{base}}thuisbatterij/#configurator">Volledige berekening met terugverdientijd</a>
-      <p class="fine">Indicatie op basis van gemiddelden. De volledige berekening houdt ook rekening met uw auto, warmtepomp en energiecontract.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <h2>Waarmee kunnen wij u helpen?</h2>
-    <p class="lead">Drie dingen doen wij het meest. Alle drie beginnen bij dezelfde vraag: kan uw installatie het aan?</p>
-    <div class="lanes">
-      <article class="lane">
-        <a class="lane-img" href="{{base}}laadpaal-installeren/" tabindex="-1" aria-hidden="true">{img("laadpaal-oprit", "", "(max-width: 860px) 100vw, 33vw", 1200, 801)}</a>
-        <h3>Laadpaal installeren</h3>
-        <ul>
-          <li>Controle van meterkast en aansluiting</li>
-          <li>Eigen groep met de juiste beveiliging</li>
-          <li>Load balancing, zodat de hoofdzekering niet uitvalt</li>
-        </ul>
-        <a class="more" href="{{base}}laadpaal-installeren/">Alles over laadpalen</a>
-      </article>
-      <article class="lane">
-        <a class="lane-img" href="{{base}}thuisbatterij/" tabindex="-1" aria-hidden="true">{img("thuisbatterij", "", "(max-width: 860px) 100vw, 33vw")}</a>
-        <h3>Thuisbatterij plaatsen</h3>
-        <ul>
-          <li>Advies op basis van uw eigen verbruik en opwek</li>
-          <li>Afgestemd op uw zonnepanelen en omvormer</li>
-          <li>Eerlijk, ook als het voor u nog niet loont</li>
-        </ul>
-        <a class="more" href="{{base}}thuisbatterij/">Thuisbatterij berekenen</a>
-      </article>
-      <article class="lane">
-        <a class="lane-img" href="{{base}}elektra/" tabindex="-1" aria-hidden="true">{img("groepenkast-detail", "", "(max-width: 860px) 100vw, 33vw")}</a>
-        <h3>Groepenkast en elektra</h3>
-        <ul>
-          <li>Groepenkast vervangen of uitbreiden</li>
-          <li>Bedrading, stopcontacten en verlichting bij verbouwing</li>
-          <li>Projecten voor aannemers en vastgoedbeheerders</li>
-        </ul>
-        <a class="more" href="{{base}}elektra/">Alle elektrawerkzaamheden</a>
-      </article>
+    <div class="center reveal">
+      <h2>Waarmee kunnen wij u helpen?</h2>
+      <p class="lead">Alles begint bij dezelfde vraag: kan uw installatie het aan?</p>
+    </div>
+    <div class="bento">
+      <a class="tile tile--photo tile--wide reveal" href="{{base}}laadpaal-installeren/">
+        {img("laadpaal-oprit", "", "(max-width: 900px) 100vw, 66vw", 1200, 801)}
+        <div class="tile-body"><h3>Laadpaal installeren</h3><p>Eigen groep, de juiste beveiliging en load balancing, zodat laden en koken samen kunnen.</p><span class="go">Alles over laadpalen</span></div>
+      </a>
+      <a class="tile tile--photo reveal" href="{{base}}thuisbatterij/">
+        {img("thuisbatterij", "", "(max-width: 900px) 100vw, 33vw")}
+        <div class="tile-body"><h3>Thuisbatterij</h3><p>Vast geplaatst of plug & play. Eerst doorgerekend, dan pas geadviseerd.</p><span class="go">Bereken uw batterij</span></div>
+      </a>
+      <a class="tile tile--photo tile--half reveal" href="{{base}}elektra/">
+        {img("groepenkast-detail", "", "(max-width: 900px) 100vw, 50vw")}
+        <div class="tile-body"><h3>Groepenkast en elektra</h3><p>Vervangen, uitbreiden, en de complete installatie bij een verbouwing.</p><span class="go">Alle elektrawerkzaamheden</span></div>
+      </a>
+      <a class="tile tile--volt tile--half reveal" href="{{base}}thuisbatterij/#configurator">
+        <div class="tile-body"><span class="tile-num">Vast of plug & play?</span><p>Een stekkerbatterij kan ook zonder zonnepanelen. Of dat loont, hangt af van uw contract. De configurator zet beide naast elkaar.</p><span class="go">Vergelijk de twee</span></div>
+      </a>
+      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">11 kW</span><p>Laden op een 3-fase aansluiting: ongeveer 60 kilometer bereik per uur.</p></div></div>
+      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">800 W</span><p>Wat de meeste stekkerbatterijen leveren. Genoeg voor koelkast en sluipverbruik, niet voor de kookplaat.</p></div></div>
+      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">1</span><p>Vast aanspreekpunt, van uw eerste vraag tot de oplevering.</p></div></div>
     </div>
   </div>
 </section>
 
-<section class="section section--mist">
-  <div class="wrap split">
-    <div>
-      <h2>Na 2027 loont zelf gebruiken meer dan terugleveren</h2>
-      <p>Op 1 januari 2027 stopt de salderingsregeling. Stroom die u teruglevert, mag u dan niet meer wegstrepen tegen wat u afneemt. Wat uw panelen overdag opwekken, wilt u dus zoveel mogelijk zelf gebruiken: in de avond, voor de auto of voor de warmtepomp.</p>
-      <p>Een thuisbatterij of een laadpaal die op zonnestroom laadt helpt daarbij. Of het voor u uit kan, hangt af van uw verbruik. Daarom rekenen wij het eerst met u door.</p>
-      <div class="btn-row"><a class="btn btn--primary" href="{{base}}thuisbatterij/#configurator">Reken uw situatie door</a></div>
+<section class="section section--ink">
+  <div class="wrap center reveal">
+    <p class="bigfact" aria-hidden="true">2027</p>
+    <h2>Salderen stopt. Zelf gebruiken loont.</h2>
+    <p class="lead">Vanaf 1 januari 2027 mag u teruggeleverde stroom niet meer wegstrepen tegen wat u afneemt. Wat uw panelen overdag opwekken, wilt u dus zelf gebruiken: in de avond, voor de auto of voor de warmtepomp.</p>
+    <div class="btn-row"><a class="btn btn--primary" href="{{base}}thuisbatterij/#configurator">Reken uw situatie door</a></div>
+  </div>
+</section>
+
+<section class="explode" aria-labelledby="opbouw-kop">
+  <div class="wrap explode-intro center reveal">
+    <h2 id="opbouw-kop">Zo zit een thuisbatterij in elkaar</h2>
+    <p class="lead">Scroll verder en het model schuift open.</p>
+  </div>
+  <div class="wrap explode-grid">
+    <div class="explode-stage" data-scene-wrap>
+      <canvas data-scene="opbouw" data-modules="4" data-pointer="0" role="img" aria-label="Opengewerkt model van een thuisbatterij: omvormer bovenop, daaronder vier batterijmodules"></canvas>
     </div>
-    {img("monteur-meterkast", "Monteur werkt aan een meterkast", w=1200, h=675)}
+    <div class="explode-steps" id="opbouw-stappen">
+      <article class="is-on"><h2>De omvormer bovenop</h2><p class="lead">Een batterij slaat gelijkstroom op, uw huis gebruikt wisselstroom. De omvormer zet het om, in beide richtingen.</p></article>
+      <article><h2>Modules die u stapelt</h2><p class="lead">De capaciteit groeit per module. Daardoor past een batterij bij uw verbruik van nu, en kunt u bij veel systemen later uitbreiden.</p></article>
+      <article><h2>Een meter die meekijkt</h2><p class="lead">Een meter in de meterkast ziet of u stroom teruglevert of afneemt. Bij overschot laadt de batterij, bij vraag levert hij.</p></article>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <h2>Van uw vraag naar een veilige installatie</h2>
+    <div class="center reveal"><h2>Van uw vraag naar een veilige installatie</h2></div>
     <ol class="steps">
       <li><h3>U vertelt wat u nodig heeft</h3><p>Bel, mail of vul het formulier in. Een korte omschrijving is genoeg. Foto's van uw meterkast helpen ons op weg.</p></li>
       <li><h3>Wij maken een passend voorstel</h3><p>We bespreken de mogelijkheden, komen zo nodig langs en zetten werk, planning en prijs helder op een rij.</p></li>
@@ -323,7 +342,7 @@ HOME = f'''
 
 <section class="section section--mist">
   <div class="wrap">
-    <h2>Zo werkt Ohand Elektra</h2>
+    <h2 class="reveal">Zo werkt Ohand Elektra</h2>
     <dl class="facts">
       <div><dt>Persoonlijk contact</dt><dd>Eén aanspreekpunt, van de eerste vraag tot de oplevering. U spreekt met de vakman die het werk uitvoert.</dd></div>
       <div><dt>Duidelijke afspraken</dt><dd>Vooraf een heldere offerte: wat we doen, wanneer we komen en wat het kost.</dd></div>
@@ -335,7 +354,7 @@ HOME = f'''
 
 <section class="section">
   <div class="wrap">
-    <h2>Veelgestelde vragen</h2>
+    <h2 class="center reveal">Veelgestelde vragen</h2>
     {faq_html(FAQ_HOME)}
   </div>
 </section>
@@ -392,7 +411,7 @@ LAADPAAL = f'''
 
 <section class="section section--mist" id="vermogen">
   <div class="wrap">
-    <h2>Welk laadvermogen past bij uw aansluiting?</h2>
+    <h2 class="reveal">Welk laadvermogen past bij uw aansluiting?</h2>
     <p class="lead">Uw aansluiting bepaalt hoe snel u thuis kunt laden. Op uw slimme meter of in de meterkast staat welke u heeft. Weet u het niet? Stuur een foto mee.</p>
     <div class="table-scroll">
       <table>
@@ -410,7 +429,7 @@ LAADPAAL = f'''
 
 <section class="section">
   <div class="wrap">
-    <h2>In drie stappen een werkende laadpaal</h2>
+    <h2 class="reveal">In drie stappen een werkende laadpaal</h2>
     <ol class="steps">
       <li><h3>Foto's en wensen</h3><p>U stuurt een foto van uw meterkast en van de plek waar de laadpaal moet komen. Wij beoordelen wat er nodig is.</p></li>
       <li><h3>Offerte op maat</h3><p>U krijgt een offerte met het werk in de meterkast, het kabeltracé en de laadpaal. Zonder verrassingen achteraf.</p></li>
@@ -421,13 +440,17 @@ LAADPAAL = f'''
 
 <section class="section section--mist">
   <div class="wrap">
-    <h2>Veelgestelde vragen over laadpalen</h2>
+    <h2 class="reveal">Veelgestelde vragen over laadpalen</h2>
     {faq_html(FAQ_LAADPAAL)}
   </div>
 </section>
 '''
 
 FAQ_BATTERIJ = [
+    ("Wat is een plug & play thuisbatterij?",
+     "Een plug & play batterij, ook wel stekkerbatterij, sluit u aan op een gewoon stopcontact. Een meter op uw slimme meter vertelt de batterij wanneer hij moet laden of leveren. De meeste modellen leveren maximaal 800 watt en hebben een capaciteit van ongeveer 1,5 tot 5 kWh. Dat is genoeg voor het basisverbruik in huis, niet voor een kookplaat of laadpaal."),
+    ("Loont een thuisbatterij zonder zonnepanelen?",
+     "Alleen met een dynamisch contract. De batterij laadt dan op uren waarop stroom goedkoop is en levert op dure uren. Met een vast of variabel contract betaalt u elk uur dezelfde prijs en valt er niets te verdienen. De configurator rekent dit voor u door."),
     ("Hoe groot moet een thuisbatterij zijn?",
      "Dat hangt af van uw stroomverbruik in de avond en nacht en van wat uw zonnepanelen overdag overhouden. Voor veel huishoudens met zonnepanelen komt de berekening uit tussen 5 en 10 kWh. Een grotere batterij slaat meer op, maar staat in de winter vaker leeg en verdient zich daardoor langzamer terug."),
     ("Wat is de terugverdientijd van een thuisbatterij?",
@@ -447,44 +470,49 @@ BATTERIJ = f'''
   <div class="wrap page-hero-grid">
     <div>
       <p class="crumbs"><a href="{{base}}">Home</a> / Thuisbatterijen</p>
-      <h1>Thuisbatterij: bereken welke capaciteit bij u past</h1>
-      <p class="lead">Vul uw verbruik en zonnepanelen in. U ziet direct hoeveel kWh opslag past, wat het ongeveer oplevert en wanneer u de investering terugverdient.</p>
+      <h1>Thuisbatterij: bereken wat bij u past</h1>
+      <p class="lead">Vast geplaatst of plug & play, met of zonder zonnepanelen. U ziet direct hoeveel kWh past, wat het ongeveer oplevert en wanneer u het terugverdient.</p>
       <div class="btn-row">
         <a class="btn btn--primary" href="#configurator">Start de berekening</a>
         <a class="btn btn--ghost" href="#contact">Vraag advies aan</a>
       </div>
     </div>
-    {img("thuisbatterij", "Thuisbatterij met omvormer aan de wand", lazy=False)}
+    <div class="stage" data-scene-wrap>
+      <canvas data-scene="kop" data-modules="3" role="img" aria-label="Driedimensionaal model van een thuisbatterij met drie modules"></canvas>
+    </div>
   </div>
 </section>
 
 <section class="section section--mist" id="configurator">
   <div class="wrap">
-    <h2>Thuisbatterij-configurator</h2>
-    <p class="lead">Zes vragen over uw woning. De uitkomst rechts rekent bij elke wijziging mee.</p>
+    <div class="center reveal">
+      <h2>Thuisbatterij-configurator</h2>
+      <p class="lead">Vier stappen. De uitkomst rekent bij elke wijziging mee.</p>
+    </div>
     <div class="cfg">
       <form class="cfg-form" id="cfg-form">
-        <p class="cfg-step">Uw stroomverbruik</p>
+        <p class="cfg-step"><b>1</b> Uw stroomverbruik</p>
         <div class="field">
           <label for="f-verbruik">Hoeveel stroom verbruikt u? <output id="verbruik-out" for="f-verbruik"></output></label>
           <input type="range" id="f-verbruik" name="verbruik" min="1000" max="12000" step="100" value="3500">
           <p class="hint">Staat op uw jaarafrekening. Weet u het niet? Kies een huishouden:</p>
-          <div class="chips" style="margin-top:8px">
-            <button type="button" class="btn btn--ghost" style="min-height:44px;padding:6px 14px" data-preset="1800">1 persoon</button>
-            <button type="button" class="btn btn--ghost" style="min-height:44px;padding:6px 14px" data-preset="2800">2 personen</button>
-            <button type="button" class="btn btn--ghost" style="min-height:44px;padding:6px 14px" data-preset="4000">Gezin</button>
-            <button type="button" class="btn btn--ghost" style="min-height:44px;padding:6px 14px" data-preset="5500">Groot gezin</button>
+          <div class="chips" style="margin-top:10px">
+            <button type="button" class="btn btn--ghost btn--sm" data-preset="1800">1 persoon</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-preset="2800">2 personen</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-preset="4000">Gezin</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-preset="5500">Groot gezin</button>
           </div>
         </div>
         <label class="check"><input type="checkbox" name="auto"><span>Ik laad thuis een elektrische auto<small>Telt 2.500 kWh per jaar bij uw verbruik op. Laat uit als dit al in uw jaarverbruik zit.</small></span></label>
         <label class="check"><input type="checkbox" name="warmtepomp"><span>Ik heb een warmtepomp<small>Telt 2.500 kWh per jaar bij uw verbruik op. Laat uit als dit al in uw jaarverbruik zit.</small></span></label>
         <hr>
-        <p class="cfg-step">Uw zonnepanelen</p>
+        <p class="cfg-step"><b>2</b> Uw zonnepanelen</p>
         <div class="field">
           <label for="f-panelen">Hoeveel zonnepanelen heeft u? <output id="panelen-out" for="f-panelen"></output></label>
           <input type="range" id="f-panelen" name="panelen" min="0" max="40" step="1" value="12">
+          <p class="hint">Geen zonnepanelen? Zet de schuif op nul. Een batterij kan dan nog steeds, met een dynamisch contract.</p>
         </div>
-        <fieldset class="field">
+        <fieldset class="field" id="zon-velden">
           <legend>Is er overdag meestal iemand thuis?</legend>
           <div class="chips">
             <label><input type="radio" name="thuis" value="ja"><span>Ja</span></label>
@@ -493,12 +521,44 @@ BATTERIJ = f'''
           </div>
         </fieldset>
         <hr>
-        <p class="cfg-step">Uw contract en aansluiting</p>
+        <p class="cfg-step"><b>3</b> Uw energiecontract</p>
+        <div class="field">
+          <label for="f-leverancier">Wie is uw energieleverancier?</label>
+          <input id="f-leverancier" name="leverancier" type="text" list="leveranciers" autocomplete="off" placeholder="Typ of kies, bijvoorbeeld Eneco">
+          <datalist id="leveranciers"></datalist>
+          <p class="hint">Gaat mee met uw aanvraag, zodat wij uw contract kunnen nakijken.</p>
+        </div>
+        <p class="notice" id="lev-hint" hidden></p>
         <fieldset class="field">
-          <legend>Welk energiecontract heeft u?</legend>
+          <legend>Wat voor contract heeft u?</legend>
+          <div class="chips chips--cards">
+            <label><input type="radio" name="contract" value="vast" checked><span>Vast<small>één prijs voor de looptijd</small></span></label>
+            <label><input type="radio" name="contract" value="variabel"><span>Variabel<small>prijs wijzigt af en toe</small></span></label>
+            <label><input type="radio" name="contract" value="dynamisch"><span>Dynamisch<small>elk uur een andere prijs</small></span></label>
+          </div>
+        </fieldset>
+        <div class="two-col">
+          <div class="field"><label for="f-stroomprijs">Stroomprijs, € per kWh</label><input id="f-stroomprijs" name="stroomprijs" type="number" step="0.01" min="0" value="0.28" inputmode="decimal"></div>
+          <div class="field" id="dyn-veld" hidden><label for="f-prijsverschil">Verschil dal en piek, € per kWh</label><input id="f-prijsverschil" name="prijsverschil" type="number" step="0.01" min="0" value="0.12" inputmode="decimal"></div>
+          <div class="field"><label for="f-teruglever">Terugleververgoeding, € per kWh</label><input id="f-teruglever" name="teruglever" type="number" step="0.01" min="0" value="0.05" inputmode="decimal"></div>
+          <div class="field"><label for="f-terugleverkosten">Terugleverkosten, € per kWh</label><input id="f-terugleverkosten" name="terugleverkosten" type="number" step="0.01" min="0" value="0.03" inputmode="decimal"></div>
+        </div>
+        <p class="hint" style="margin:-8px 0 0">Dit zijn gemiddelden. Uw eigen tarieven staan op uw contract of in de app van uw leverancier; wij vullen ze niet per leverancier in, omdat ze per contract verschillen en vaak wijzigen.</p>
+        <hr>
+        <p class="cfg-step"><b>4</b> Uw wensen</p>
+        <fieldset class="field">
+          <legend>Welke batterij zoekt u?</legend>
+          <div class="chips chips--cards">
+            <label><input type="radio" name="soort" value="advies" checked><span>Adviseer mij<small>de beste van de twee</small></span></label>
+            <label><input type="radio" name="soort" value="vast"><span>Vaste batterij<small>door de installateur, 5 tot 20 kWh</small></span></label>
+            <label><input type="radio" name="soort" value="plug"><span>Plug & play<small>in het stopcontact, 1,5 tot 5 kWh</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>Wat wilt u ermee bereiken?</legend>
           <div class="chips">
-            <label><input type="radio" name="contract" value="vast of variabel" checked><span>Vast of variabel</span></label>
-            <label><input type="radio" name="contract" value="dynamisch"><span>Dynamisch (uurprijzen)</span></label>
+            <label><input type="radio" name="doel" value="besparen" checked><span>Besparen</span></label>
+            <label><input type="radio" name="doel" value="noodstroom"><span>Ook stroom bij een storing</span></label>
           </div>
         </fieldset>
         <fieldset class="field">
@@ -510,41 +570,49 @@ BATTERIJ = f'''
           </div>
         </fieldset>
         <details class="adv">
-          <summary>Aannames aanpassen (prijzen en tarieven)</summary>
-          <div class="adv-grid">
-            <div class="field"><label for="f-stroomprijs">Stroomprijs, € per kWh</label><input id="f-stroomprijs" name="stroomprijs" type="number" step="0.01" min="0" value="0.28" inputmode="decimal"></div>
-            <div class="field"><label for="f-teruglever">Terugleververgoeding netto, € per kWh</label><input id="f-teruglever" name="teruglever" type="number" step="0.01" value="0.02" inputmode="decimal"></div>
-            <div class="field"><label for="f-prijsvast">Richtprijs installatie, vast deel in €</label><input id="f-prijsvast" name="prijsvast" type="number" step="50" min="0" value="1200" inputmode="numeric"></div>
-            <div class="field"><label for="f-prijskwh">Richtprijs per kWh opslag in €</label><input id="f-prijskwh" name="prijskwh" type="number" step="10" min="0" value="450" inputmode="numeric"></div>
+          <summary>Richtprijzen aanpassen</summary>
+          <div class="two-col">
+            <div class="field"><label for="f-prijsvast">Vaste batterij, vast deel in €</label><input id="f-prijsvast" name="prijsvast" type="number" step="50" min="0" value="1200" inputmode="numeric"></div>
+            <div class="field"><label for="f-prijskwh">Vaste batterij, € per kWh</label><input id="f-prijskwh" name="prijskwh" type="number" step="10" min="0" value="450" inputmode="numeric"></div>
+            <div class="field"><label for="f-plugvast">Plug & play, vast deel in €</label><input id="f-plugvast" name="plugvast" type="number" step="50" min="0" value="200" inputmode="numeric"></div>
+            <div class="field"><label for="f-plugkwh">Plug & play, € per kWh</label><input id="f-plugkwh" name="plugkwh" type="number" step="10" min="0" value="380" inputmode="numeric"></div>
             <div class="field"><label for="f-wp">Vermogen per paneel in Wp</label><input id="f-wp" name="wp" type="number" step="5" min="100" value="400" inputmode="numeric"></div>
           </div>
-          <p class="hint" style="margin-bottom:16px">Terugleververgoeding netto: wat u per kWh overhoudt na terugleverkosten. Dat kan ook negatief zijn.</p>
         </details>
       </form>
 
       <div class="cfg-result" aria-live="polite">
-        <h3>Passende capaciteit voor uw situatie</h3>
-        <div class="batt">
-          <div class="batt-num" id="r-cap">–</div>
-          <div class="batt-cells" id="batt-cells" aria-hidden="true"></div>
-        </div>
+        <div class="cfg-stage" data-scene-wrap><canvas data-scene="cfg" data-modules="2" data-pointer="0" data-yaw="-0.55" aria-hidden="true"></canvas></div>
+        <h3>Passend bij uw situatie</h3>
+        <div class="batt-num" id="r-cap">–</div>
+        <span class="batt-soort" id="r-soort"></span>
         <p class="verdict" id="r-verdict"></p>
         <div class="kpis">
           <div><strong id="r-save">–</strong><span>besparing per jaar</span></div>
           <div><strong id="r-payback">–</strong><span>terugverdientijd</span></div>
           <div><strong id="r-profit">–</strong><span id="r-profit-label">winst na 15 jaar</span></div>
         </div>
-        <div class="self">
+        <div class="block" id="r-zelf">
           <h3>Aandeel van uw verbruik uit eigen zonnestroom</h3>
           <div class="self-row"><span>Zonder batterij</span><div class="self-bar"><i id="r-self0"></i></div><b id="r-self0-n"></b></div>
           <div class="self-row"><span>Met batterij</span><div class="self-bar"><i class="with" id="r-self1"></i></div><b id="r-self1-n"></b></div>
         </div>
-        <div class="chart">
+        <div class="block">
+          <h3>Vast en plug & play naast elkaar</h3>
+          <table class="compare">
+            <thead><tr><th scope="col">Soort</th><th scope="col">Capaciteit</th><th scope="col">Richtprijs</th><th scope="col">Per jaar</th><th scope="col">Terug in</th></tr></thead>
+            <tbody id="r-compare"></tbody>
+          </table>
+        </div>
+        <div class="block chart">
           <h3>Saldo van uw investering over 15 jaar</h3>
           <svg id="r-chart" role="img" aria-label="Grafiek: het saldo begint op min de investering en stijgt elk jaar met de besparing"></svg>
         </div>
         <ul class="cfg-notes">
-          <li>Richtprijs inclusief installatie en btw: <span id="r-cost"></span>. De werkelijke prijs volgt uit onze offerte.</li>
+          <li>Richtprijs inclusief btw: <span id="r-cost"></span>. De werkelijke prijs volgt uit onze offerte.</li>
+          <li id="r-handel" hidden>Waarvan <span id="r-handel-n"></span> per jaar door laden op goedkope en gebruiken op dure uren.</li>
+          <li id="r-plug" hidden>Een stekkerbatterij levert meestal maximaal 800 watt. Laat controleren of de groep waarop hij komt dat aankan.</li>
+          <li id="r-nood" hidden>Voor stroom bij een storing is een vaste batterij met noodstroomfunctie nodig. De meeste stekkerbatterijen schakelen uit als het net wegvalt.</li>
           <li id="r-fase" hidden>Bij deze capaciteit is een 3-fase aansluiting vaak nodig. Wij kijken dit voor u na.</li>
           <li>Schatting op basis van gemiddelden, geen garantie. Gerekend zonder salderen (situatie vanaf 2027).</li>
         </ul>
@@ -560,6 +628,7 @@ BATTERIJ = f'''
       <h2>Zo rekent de configurator</h2>
       <p>Zonnepanelen leveren het meest als u het minst verbruikt: midden op de dag. Zonder batterij gebruikt een gemiddeld huishouden daardoor ongeveer een derde van de eigen opwek direct. De rest gaat het net op.</p>
       <p>Een batterij schuift dat overschot door naar de avond en nacht. De configurator schat hoeveel kWh u daarmee extra zelf gebruikt en zet die tegen uw stroomprijs. Daarvan gaat af wat u anders voor terugleveren had gekregen.</p>
+      <p>Heeft u een dynamisch contract, dan telt ook mee dat de batterij laadt op goedkope uren en levert op dure. Zonder zonnepanelen is dat de enige opbrengst.</p>
       <ul class="ticks">
         <li>Gerekend met de situatie zonder salderen, vanaf 2027</li>
         <li>Laad- en ontlaadverlies van 10 procent meegenomen</li>
@@ -574,7 +643,7 @@ BATTERIJ = f'''
 
 <section class="section section--mist">
   <div class="wrap">
-    <h2>Van berekening naar werkende batterij</h2>
+    <h2 class="reveal">Van berekening naar werkende batterij</h2>
     <ol class="steps">
       <li><h3>Indicatie</h3><p>U rekent uw situatie door en stuurt de uitkomst mee met uw aanvraag.</p></li>
       <li><h3>Controle van uw installatie</h3><p>Wij kijken naar uw zonnepanelen, omvormer, meterkast en de plek voor de batterij.</p></li>
@@ -585,7 +654,7 @@ BATTERIJ = f'''
 
 <section class="section">
   <div class="wrap">
-    <h2>Veelgestelde vragen over thuisbatterijen</h2>
+    <h2 class="reveal">Veelgestelde vragen over thuisbatterijen</h2>
     {faq_html(FAQ_BATTERIJ)}
   </div>
 </section>
@@ -667,7 +736,7 @@ ELEKTRA = f'''
 
 <section class="section section--mist">
   <div class="wrap">
-    <h2>Veelgestelde vragen over elektra</h2>
+    <h2 class="reveal">Veelgestelde vragen over elektra</h2>
     {faq_html(FAQ_ELEKTRA)}
   </div>
 </section>
@@ -705,7 +774,7 @@ NOTFOUND = '''
 CALC = ["calc.js", "site.js"]
 
 PAGES = [
-    dict(path="", base="", crumb="Home", scripts=CALC,
+    dict(path="", base="", crumb="Home", scripts=CALC, scene=True,
          title="Ohand Elektra | Laadpaal, thuisbatterij en elektra laten installeren",
          description="Elektricien voor laadpalen, thuisbatterijen, groepenkasten en elektra. Bereken welke thuisbatterij bij u past en vraag een heldere offerte aan.",
          body=HOME, ld=[faq_ld(FAQ_HOME)]),
@@ -713,9 +782,9 @@ PAGES = [
          title="Laadpaal laten installeren | Ohand Elektra",
          description="Laadpaal thuis of op de zaak laten installeren. Controle van uw meterkast, eigen groep, load balancing en laden op zonnestroom. Vraag een offerte aan.",
          body=LAADPAAL, ld=[faq_ld(FAQ_LAADPAAL), {"@type": "Service", "name": "Laadpaal installeren", "serviceType": "Installatie van laadpalen voor elektrische auto's", "provider": {"@id": SITE_URL + "#bedrijf"}}]),
-    dict(path="thuisbatterij/", base="../", crumb="Thuisbatterij", onderwerp="Thuisbatterij", scripts=CALC,
+    dict(path="thuisbatterij/", base="../", crumb="Thuisbatterij", onderwerp="Thuisbatterij", scripts=CALC, scene=True,
          title="Thuisbatterij berekenen: capaciteit en terugverdientijd | Ohand Elektra",
-         description="Bereken met de thuisbatterij-configurator hoeveel kWh opslag bij uw woning past, wat het oplevert en wat de terugverdientijd is. Gerekend zonder salderen.",
+         description="Bereken welke thuisbatterij bij u past: vast of plug & play, met of zonder zonnepanelen. Met capaciteit in kWh, besparing en terugverdientijd.",
          body=BATTERIJ, ld=[faq_ld(FAQ_BATTERIJ), {"@type": "Service", "name": "Thuisbatterij plaatsen", "serviceType": "Advies en installatie van thuisbatterijen", "provider": {"@id": SITE_URL + "#bedrijf"}},
                             {"@type": "WebApplication", "name": "Thuisbatterij-configurator", "url": SITE_URL + "thuisbatterij/#configurator", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Alle", "inLanguage": "nl-NL", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}}]),
     dict(path="elektra/", base="../", crumb="Elektra", onderwerp="Groepenkast",
