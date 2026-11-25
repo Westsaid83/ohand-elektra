@@ -29,6 +29,79 @@
     });
   }
 
+  /* Uitklapmenu met alle diensten */
+  var drop = $('.drop'), dropBtn = $('.drop-btn');
+  if (drop && dropBtn) {
+    var zet = function (open) { drop.classList.toggle('is-open', open); dropBtn.setAttribute('aria-expanded', open ? 'true' : 'false'); };
+    dropBtn.addEventListener('click', function (e) { e.stopPropagation(); zet(!drop.classList.contains('is-open')); });
+    document.addEventListener('click', function (e) { if (!drop.contains(e.target)) zet(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drop.classList.contains('is-open')) { zet(false); dropBtn.focus(); } });
+  }
+
+  /* Stappenformulier op de homepage: dienst, één vervolgvraag, moment, gegevens.
+     De vervolgvraag hangt af van de gekozen dienst. Versturen gaat, net als het
+     contactformulier, via het e-mailprogramma van de bezoeker. */
+  var wiz = $('#wiz');
+  if (wiz) {
+    var VRAGEN = {
+      'Laadpaal': ['Waar komt de laadpaal?', 'Dat bepaalt het kabeltracé en de montage.', ['Op mijn eigen oprit', 'In een garage of carport', 'Bij een bedrijf of VvE', 'Dat weet ik nog niet']],
+      'Thuisbatterij': ['Heeft u zonnepanelen?', 'Zonder panelen kan het ook, met een dynamisch contract.', ['Ja, ik heb zonnepanelen', 'Nee, geen zonnepanelen', 'Die komen er binnenkort']],
+      'Groepenkast': ['Wat is de aanleiding?', 'Zo weten wij waar wij naar moeten kijken.', ['De kast is verouderd', 'Ik heb extra groepen nodig', 'Ik wil naar een 3-fase aansluiting', 'Groepen vallen regelmatig uit']],
+      'Elektra bij verbouwing': ['Wat wordt er verbouwd?', 'Een globale indicatie is genoeg.', ['Keuken', 'Badkamer', 'Uitbouw of zolder', 'De hele woning']],
+      'Zakelijk project': ['Wat voor project is het?', 'Wij werken voor aannemers, beheerders en VvE\'s.', ['Woningbouw', 'Utiliteitsbouw', 'Renovatie', 'Beheer en onderhoud']]
+    };
+    var stap = 1, stappen = $$('.wiz-step', wiz), terug = $('#wiz-terug');
+    var heeftVraag = function () { return !!VRAGEN[wiz.dienst.value]; };
+    var toon = function (n, focus) {
+      stap = n;
+      stappen.forEach(function (f) { f.classList.toggle('is-on', +f.dataset.step === n); });
+      $('#wiz-stap').textContent = 'Stap ' + n + ' van 4';
+      $('#wiz-bar').style.width = (n * 25) + '%';
+      terug.hidden = n === 1;
+      if (n === 4) {
+        var delen = [wiz.dienst.value, (wiz.detail && wiz.detail.value) || '', wiz.wanneer.value].filter(Boolean);
+        $('#wiz-samenvatting').textContent = 'Uw aanvraag: ' + delen.join(' / ').toLowerCase() + '.';
+      }
+      if (focus) { var el = $('.wiz-step.is-on input', wiz); if (el) el.focus({ preventScroll: true }); }
+    };
+    var bouwVraag = function () {
+      var v = VRAGEN[wiz.dienst.value];
+      $('#wiz-q2').textContent = v[0]; $('#wiz-q2-sub').textContent = v[1];
+      $('#wiz-opties').innerHTML = v[2].map(function (t) {
+        return '<label class="opt"><input type="radio" name="detail" value="' + t + '"><span><b>' + t + '</b></span></label>';
+      }).join('');
+    };
+    var verder = function (naam) {
+      if (naam === 'dienst') { if (heeftVraag()) { bouwVraag(); toon(2, true); } else { $('#wiz-opties').innerHTML = ''; toon(3, true); } }
+      else if (naam === 'detail') toon(3, true);
+      else if (naam === 'wanneer') toon(4, true);
+    };
+    /* Een klik op een antwoord gaat verder, ook als dat antwoord al gekozen was.
+       Met het toetsenbord kiest u met de pijltjes en gaat u verder met Enter. */
+    wiz.addEventListener('click', function (e) {
+      var r = e.target;
+      if (r && r.type === 'radio' && +r.closest('.wiz-step').dataset.step === stap) verder(r.name);
+    });
+    wiz.addEventListener('keydown', function (e) {
+      var r = e.target;
+      if (e.key === 'Enter' && r && r.type === 'radio') { e.preventDefault(); if (!r.checked) r.checked = true; verder(r.name); }
+    });
+    terug.addEventListener('click', function () { toon(stap === 3 && !heeftVraag() ? 1 : stap - 1, true); });
+    wiz.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (stap !== 4) return;
+      if (!wiz.reportValidity()) return;
+      var regels = ['Aanvraag via het stappenformulier op de website', '',
+        'Dienst: ' + wiz.dienst.value,
+        (wiz.detail && wiz.detail.value) ? 'Situatie: ' + wiz.detail.value : null,
+        'Wanneer: ' + wiz.wanneer.value, '',
+        'Naam: ' + wiz.naam.value, 'Telefoon: ' + wiz.telefoon.value, 'Postcode: ' + wiz.postcode.value, '',
+        'Toelichting: '].filter(function (x) { return x !== null; });
+      location.href = 'mailto:' + wiz.dataset.to + '?subject=' + encodeURIComponent('Aanvraag ' + wiz.dienst.value + ' via de website') + '&body=' + encodeURIComponent(regels.join('\n'));
+      $('#wiz-status').textContent = 'Uw e-mailprogramma is geopend met een ingevuld bericht. Verstuur het daar om uw aanvraag af te ronden.';
+    });
+  }
+
   /* Inhoud die binnenkomt bij scrollen */
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (items) {

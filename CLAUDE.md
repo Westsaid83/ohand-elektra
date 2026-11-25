@@ -43,21 +43,42 @@ tarieven staan in `AANNAMES` bovenaan `calc.js`.
 - De formules voor eigen verbruik zijn een benadering van gemiddelden, geen
   simulatie per uur. Presenteer de uitkomst altijd als indicatie.
 
-## Stijl en 3D
+## Stijl en opbouw
 
-Van Said, 25 november 2026: "Gebruik 3D elementen en laat de website heel erg
-hip zijn zoals een Apple website." Dat gaat voor de algemene regel in de
-webdesign-skill dat een dienstverlener geen 3D krijgt.
+Drie rondes op 25 november 2026, alle drie van Said. De laatste geldt:
 
-- `assets/scene.js` tekent de thuisbatterij (en op de homepage de laadpaal)
-  met three.js uit `assets/vendor/`. Elk `<canvas data-scene="naam">` wordt
-  een model; `site.js` stuurt het aan via `window.OhandScenes`.
-- Het aantal modules in de configurator volgt de berekende capaciteit
-  (één module per 2,5 kWh). Het model is een eigen tekening, geen bestaand
-  product.
-- Op de homepage staat een importmap met `./assets/...`: zonder `./` weigert
-  de browser hem ("blocked by a null value") en laadt er geen enkel model.
-- Zonder WebGL of met "minder beweging" blijft de pagina volledig bruikbaar.
+1. Eerste herontwerp: rustig en zakelijk.
+2. "Gebruik 3D elementen en laat de website heel erg hip zijn zoals een Apple
+   website."
+3. "Pas de website weer helemaal aan en gebruik autoladen24.nl als inspiratie
+   maar wees origineel." Dat is de stand van nu: licht, praktisch en gericht
+   op de aanvraag.
+
+Wat van die derde ronde is overgenomen is de AANPAK, niet de vorm: een
+stappenformulier in de hero, alle diensten direct aanklikbaar (uitklapmenu en
+raster), vier zekerheden onder de hero en een belknop die op mobiel in beeld
+blijft. Kleuren, lettertype, teksten, pictogrammen en indeling zijn eigen.
+
+- **Stappenformulier** (`#wiz` op de homepage, werking in `site.js`): dienst,
+  één vervolgvraag per dienst (`VRAGEN`), moment, gegevens. "Iets anders"
+  slaat de vervolgvraag over. Versturen gaat via `mailto:`, net als het
+  contactformulier.
+- **Diensten** staan één keer in `DIENSTEN` in `tools/build.py`; het menu en
+  het raster lezen die lijst. Elk adres met een `#` moet op de doelpagina een
+  element met dat id hebben.
+- **Pictogrammen** zijn eigen lijntekeningen in `ICON_PATHS`.
+- **3D** staat alleen nog op de thuisbatterijpagina (kop, configurator en het
+  model dat openschuift). `assets/scene.js` tekent het met three.js uit
+  `assets/vendor/`; elk `<canvas data-scene="naam">` wordt een model en
+  `site.js` stuurt het aan via `window.OhandScenes`. Het aantal modules in de
+  configurator volgt de berekende capaciteit (één per 2,5 kWh). Het model is
+  een eigen tekening, geen bestaand product.
+- Een pagina in de hoofdmap die het model laadt, heeft een importmap met
+  `./assets/...` nodig: zonder `./` weigert de browser hem ("blocked by a null
+  value"). `build.py` regelt dat.
+- Niet overgenomen omdat de gegevens ontbreken: een werkgebied met
+  plaatsnamen, projectfoto's, reviews, keurmerken en een WhatsApp-knop. "Ede"
+  staat er alleen als vestigingsplaats.
 
 ## Regels
 
