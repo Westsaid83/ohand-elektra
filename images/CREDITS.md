@@ -22,3 +22,5 @@ Het zijn sfeerbeelden, geen eigen projecten. Vervang ze bij voorkeur door eigen 
 De bestanden staan als WebP in twee breedtes (640 en 1200 pixels); `og.jpg` is de uitsnede van laadpaal-oprit voor gedeelde links.
 
 Lettertype: Archivo (SIL Open Font License), zelf gehost in `assets/fonts/`.
+
+3D-model: eigen ontwerp, getekend met three.js (MIT-licentie, `assets/vendor/THREE-LICENSE`), zelf gehost.

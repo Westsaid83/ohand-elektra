@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.className="js"</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ohand Elektra | Laadpaal, thuisbatterij en elektra laten installeren</title>
 <meta name="description" content="Elektricien voor laadpalen, thuisbatterijen, groepenkasten en elektra. Bereken welke thuisbatterij bij u past en vraag een heldere offerte aan.">
@@ -37,96 +38,105 @@
 <main id="inhoud">
 
 <section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <h1>Elektricien voor laadpalen, thuisbatterijen en elektra</h1>
-      <p class="lead">Ohand Elektra sluit uw laadpaal of thuisbatterij veilig aan en zorgt dat uw meterkast erop berekend is. U spreekt met de vakman die het werk ook uitvoert.</p>
-      <div class="btn-row">
-        <a class="btn btn--primary" href="#contact">Offerte aanvragen</a>
-        <a class="btn btn--ghost" href="thuisbatterij/#configurator">Bereken uw thuisbatterij</a>
-      </div>
-      <ul class="hero-facts">
-        <li>Eén vast aanspreekpunt</li>
-        <li>Heldere offerte vooraf</li>
-        <li>Werk volgens de geldende normen</li>
-      </ul>
+  <div class="wrap">
+    <h1>Laadpaal, thuisbatterij en elektra. Vakkundig aangesloten.</h1>
+    <p class="lead">Ohand Elektra zorgt dat uw meterkast klaar is voor laden, opslaan en alles wat erbij komt. U spreekt met de vakman die het werk ook uitvoert.</p>
+    <div class="btn-row">
+      <a class="btn btn--primary" href="thuisbatterij/#configurator">Bereken uw thuisbatterij</a>
+      <a class="btn btn--ghost" href="#contact">Offerte aanvragen</a>
     </div>
-    <div class="quick" id="quick">
+  </div>
+  <div class="stage" data-scene-wrap>
+    <canvas data-scene="hero" data-wallbox="1" data-modules="4" role="img" aria-label="Driedimensionaal model van een thuisbatterij met vier modules en een laadpaal"></canvas>
+  </div>
+</section>
+
+<section class="section section--mist">
+  <div class="wrap">
+    <div class="center reveal">
       <h2>Welke thuisbatterij past bij u?</h2>
-      <p class="sub">Schuif naar uw situatie en zie direct een indicatie.</p>
-      <div class="field">
-        <label for="q-verbruik">Stroomverbruik per jaar <output id="q-verbruik-out" for="q-verbruik"></output></label>
-        <input type="range" id="q-verbruik" min="1500" max="10000" step="100" value="3500">
-      </div>
-      <div class="field">
-        <label for="q-panelen">Zonnepanelen <output id="q-panelen-out" for="q-panelen"></output></label>
-        <input type="range" id="q-panelen" min="0" max="36" step="1" value="12">
+      <p class="lead">Twee schuiven, direct een indicatie.</p>
+    </div>
+    <div class="quick reveal" id="quick">
+      <div>
+        <div class="field">
+          <label for="q-verbruik">Stroomverbruik per jaar <output id="q-verbruik-out" for="q-verbruik"></output></label>
+          <input type="range" id="q-verbruik" min="1500" max="10000" step="100" value="3500">
+        </div>
+        <div class="field">
+          <label for="q-panelen">Zonnepanelen <output id="q-panelen-out" for="q-panelen"></output></label>
+          <input type="range" id="q-panelen" min="0" max="36" step="1" value="12">
+        </div>
+        <a class="btn btn--primary" id="q-link" href="thuisbatterij/#configurator">Volledige berekening</a>
+        <p class="fine" id="q-note"></p>
       </div>
       <div class="quick-out" aria-live="polite">
         <div><strong id="q-cap">–</strong><span>passende capaciteit</span></div>
         <div><strong id="q-save">–</strong><span>geschatte besparing per jaar</span></div>
       </div>
-      <a class="btn btn--primary" id="q-link" href="thuisbatterij/#configurator">Volledige berekening met terugverdientijd</a>
-      <p class="fine">Indicatie op basis van gemiddelden. De volledige berekening houdt ook rekening met uw auto, warmtepomp en energiecontract.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <h2>Waarmee kunnen wij u helpen?</h2>
-    <p class="lead">Drie dingen doen wij het meest. Alle drie beginnen bij dezelfde vraag: kan uw installatie het aan?</p>
-    <div class="lanes">
-      <article class="lane">
-        <a class="lane-img" href="laadpaal-installeren/" tabindex="-1" aria-hidden="true"><img src="images/laadpaal-oprit-1200.webp" srcset="images/laadpaal-oprit-640.webp 640w, images/laadpaal-oprit-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 33vw" width="1200" height="801" alt="" loading="lazy" decoding="async"></a>
-        <h3>Laadpaal installeren</h3>
-        <ul>
-          <li>Controle van meterkast en aansluiting</li>
-          <li>Eigen groep met de juiste beveiliging</li>
-          <li>Load balancing, zodat de hoofdzekering niet uitvalt</li>
-        </ul>
-        <a class="more" href="laadpaal-installeren/">Alles over laadpalen</a>
-      </article>
-      <article class="lane">
-        <a class="lane-img" href="thuisbatterij/" tabindex="-1" aria-hidden="true"><img src="images/thuisbatterij-1200.webp" srcset="images/thuisbatterij-640.webp 640w, images/thuisbatterij-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 33vw" width="1200" height="900" alt="" loading="lazy" decoding="async"></a>
-        <h3>Thuisbatterij plaatsen</h3>
-        <ul>
-          <li>Advies op basis van uw eigen verbruik en opwek</li>
-          <li>Afgestemd op uw zonnepanelen en omvormer</li>
-          <li>Eerlijk, ook als het voor u nog niet loont</li>
-        </ul>
-        <a class="more" href="thuisbatterij/">Thuisbatterij berekenen</a>
-      </article>
-      <article class="lane">
-        <a class="lane-img" href="elektra/" tabindex="-1" aria-hidden="true"><img src="images/groepenkast-detail-1200.webp" srcset="images/groepenkast-detail-640.webp 640w, images/groepenkast-detail-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 33vw" width="1200" height="900" alt="" loading="lazy" decoding="async"></a>
-        <h3>Groepenkast en elektra</h3>
-        <ul>
-          <li>Groepenkast vervangen of uitbreiden</li>
-          <li>Bedrading, stopcontacten en verlichting bij verbouwing</li>
-          <li>Projecten voor aannemers en vastgoedbeheerders</li>
-        </ul>
-        <a class="more" href="elektra/">Alle elektrawerkzaamheden</a>
-      </article>
+    <div class="center reveal">
+      <h2>Waarmee kunnen wij u helpen?</h2>
+      <p class="lead">Alles begint bij dezelfde vraag: kan uw installatie het aan?</p>
+    </div>
+    <div class="bento">
+      <a class="tile tile--photo tile--wide reveal" href="laadpaal-installeren/">
+        <img src="images/laadpaal-oprit-1200.webp" srcset="images/laadpaal-oprit-640.webp 640w, images/laadpaal-oprit-1200.webp 1200w" sizes="(max-width: 900px) 100vw, 66vw" width="1200" height="801" alt="" loading="lazy" decoding="async">
+        <div class="tile-body"><h3>Laadpaal installeren</h3><p>Eigen groep, de juiste beveiliging en load balancing, zodat laden en koken samen kunnen.</p><span class="go">Alles over laadpalen</span></div>
+      </a>
+      <a class="tile tile--photo reveal" href="thuisbatterij/">
+        <img src="images/thuisbatterij-1200.webp" srcset="images/thuisbatterij-640.webp 640w, images/thuisbatterij-1200.webp 1200w" sizes="(max-width: 900px) 100vw, 33vw" width="1200" height="900" alt="" loading="lazy" decoding="async">
+        <div class="tile-body"><h3>Thuisbatterij</h3><p>Vast geplaatst of plug & play. Eerst doorgerekend, dan pas geadviseerd.</p><span class="go">Bereken uw batterij</span></div>
+      </a>
+      <a class="tile tile--photo tile--half reveal" href="elektra/">
+        <img src="images/groepenkast-detail-1200.webp" srcset="images/groepenkast-detail-640.webp 640w, images/groepenkast-detail-1200.webp 1200w" sizes="(max-width: 900px) 100vw, 50vw" width="1200" height="900" alt="" loading="lazy" decoding="async">
+        <div class="tile-body"><h3>Groepenkast en elektra</h3><p>Vervangen, uitbreiden, en de complete installatie bij een verbouwing.</p><span class="go">Alle elektrawerkzaamheden</span></div>
+      </a>
+      <a class="tile tile--volt tile--half reveal" href="thuisbatterij/#configurator">
+        <div class="tile-body"><span class="tile-num">Vast of plug & play?</span><p>Een stekkerbatterij kan ook zonder zonnepanelen. Of dat loont, hangt af van uw contract. De configurator zet beide naast elkaar.</p><span class="go">Vergelijk de twee</span></div>
+      </a>
+      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">11 kW</span><p>Laden op een 3-fase aansluiting: ongeveer 60 kilometer bereik per uur.</p></div></div>
+      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">800 W</span><p>Wat de meeste stekkerbatterijen leveren. Genoeg voor koelkast en sluipverbruik, niet voor de kookplaat.</p></div></div>
+      <div class="tile tile--dark reveal"><div class="tile-body"><span class="tile-num" style="color:#fff">1</span><p>Vast aanspreekpunt, van uw eerste vraag tot de oplevering.</p></div></div>
     </div>
   </div>
 </section>
 
-<section class="section section--mist">
-  <div class="wrap split">
-    <div>
-      <h2>Na 2027 loont zelf gebruiken meer dan terugleveren</h2>
-      <p>Op 1 januari 2027 stopt de salderingsregeling. Stroom die u teruglevert, mag u dan niet meer wegstrepen tegen wat u afneemt. Wat uw panelen overdag opwekken, wilt u dus zoveel mogelijk zelf gebruiken: in de avond, voor de auto of voor de warmtepomp.</p>
-      <p>Een thuisbatterij of een laadpaal die op zonnestroom laadt helpt daarbij. Of het voor u uit kan, hangt af van uw verbruik. Daarom rekenen wij het eerst met u door.</p>
-      <div class="btn-row"><a class="btn btn--primary" href="thuisbatterij/#configurator">Reken uw situatie door</a></div>
+<section class="section section--ink">
+  <div class="wrap center reveal">
+    <p class="bigfact" aria-hidden="true">2027</p>
+    <h2>Salderen stopt. Zelf gebruiken loont.</h2>
+    <p class="lead">Vanaf 1 januari 2027 mag u teruggeleverde stroom niet meer wegstrepen tegen wat u afneemt. Wat uw panelen overdag opwekken, wilt u dus zelf gebruiken: in de avond, voor de auto of voor de warmtepomp.</p>
+    <div class="btn-row"><a class="btn btn--primary" href="thuisbatterij/#configurator">Reken uw situatie door</a></div>
+  </div>
+</section>
+
+<section class="explode" aria-labelledby="opbouw-kop">
+  <div class="wrap explode-intro center reveal">
+    <h2 id="opbouw-kop">Zo zit een thuisbatterij in elkaar</h2>
+    <p class="lead">Scroll verder en het model schuift open.</p>
+  </div>
+  <div class="wrap explode-grid">
+    <div class="explode-stage" data-scene-wrap>
+      <canvas data-scene="opbouw" data-modules="4" data-pointer="0" role="img" aria-label="Opengewerkt model van een thuisbatterij: omvormer bovenop, daaronder vier batterijmodules"></canvas>
     </div>
-    <img src="images/monteur-meterkast-1200.webp" srcset="images/monteur-meterkast-640.webp 640w, images/monteur-meterkast-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 50vw" width="1200" height="675" alt="Monteur werkt aan een meterkast" loading="lazy" decoding="async">
+    <div class="explode-steps" id="opbouw-stappen">
+      <article class="is-on"><h2>De omvormer bovenop</h2><p class="lead">Een batterij slaat gelijkstroom op, uw huis gebruikt wisselstroom. De omvormer zet het om, in beide richtingen.</p></article>
+      <article><h2>Modules die u stapelt</h2><p class="lead">De capaciteit groeit per module. Daardoor past een batterij bij uw verbruik van nu, en kunt u bij veel systemen later uitbreiden.</p></article>
+      <article><h2>Een meter die meekijkt</h2><p class="lead">Een meter in de meterkast ziet of u stroom teruglevert of afneemt. Bij overschot laadt de batterij, bij vraag levert hij.</p></article>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <h2>Van uw vraag naar een veilige installatie</h2>
-    <ol class="steps">
+    <div class="center reveal"><h2>Van uw vraag naar een veilige installatie</h2></div>
+    <ol class="steps reveal">
       <li><h3>U vertelt wat u nodig heeft</h3><p>Bel, mail of vul het formulier in. Een korte omschrijving is genoeg. Foto's van uw meterkast helpen ons op weg.</p></li>
       <li><h3>Wij maken een passend voorstel</h3><p>We bespreken de mogelijkheden, komen zo nodig langs en zetten werk, planning en prijs helder op een rij.</p></li>
       <li><h3>Na akkoord plannen we het werk</h3><p>U weet vooraf wanneer we komen en hoelang het duurt. Na afloop lopen we de installatie samen met u door.</p></li>
@@ -136,8 +146,8 @@
 
 <section class="section section--mist">
   <div class="wrap">
-    <h2>Zo werkt Ohand Elektra</h2>
-    <dl class="facts">
+    <h2 class="reveal">Zo werkt Ohand Elektra</h2>
+    <dl class="facts reveal">
       <div><dt>Persoonlijk contact</dt><dd>Eén aanspreekpunt, van de eerste vraag tot de oplevering. U spreekt met de vakman die het werk uitvoert.</dd></div>
       <div><dt>Duidelijke afspraken</dt><dd>Vooraf een heldere offerte: wat we doen, wanneer we komen en wat het kost.</dd></div>
       <div><dt>Vakkundige installatie</dt><dd>Wij werken volgens de geldende normen en controleren de installatie voordat we deze opleveren.</dd></div>
@@ -148,8 +158,8 @@
 
 <section class="section">
   <div class="wrap">
-    <h2>Veelgestelde vragen</h2>
-    <div class="faq"><details><summary>Kan ik een laadpaal laten installeren bij mijn woning?</summary><p>Meestal wel, als u een eigen oprit of parkeerplaats heeft. Wij bekijken of uw meterkast en aansluiting voldoende ruimte bieden en adviseren zo nodig over een uitbreiding. Parkeert u aan de openbare weg, dan gelden de regels van uw gemeente.</p></details><details><summary>Is mijn woning geschikt voor een thuisbatterij?</summary><p>Dat hangt af van uw zonnepanelen, uw omvormer, uw stroomverbruik en de ruimte in en rond uw meterkast. Met de configurator op deze site krijgt u een eerste indicatie. Daarna kijken wij naar uw bestaande installatie en vertellen wij eerlijk of een thuisbatterij voor u zinvol is.</p></details><details><summary>Wanneer moet mijn groepenkast worden vervangen?</summary><p>Een groepenkast heeft geen vaste houdbaarheidsdatum. Vervangen is verstandig als de kast nog met stoppen werkt, als er geen aardlekschakelaar in zit, als groepen regelmatig uitvallen of als u extra groepen nodig heeft voor een inductiekookplaat, laadpaal of warmtepomp.</p></details><details><summary>Kan ik foto's meesturen voor een offerte?</summary><p>Ja, graag zelfs. Een foto van uw meterkast en van de plek waar het werk moet gebeuren geeft ons snel een goed beeld. Soms is daarnaast een bezoek nodig om een nauwkeurige offerte te maken.</p></details><details><summary>Wat bepaalt de kosten van elektrotechnisch werk?</summary><p>De omvang van het werk, de staat van uw bestaande installatie, de gekozen materialen en hoe goed leidingen bereikbaar zijn. U ontvangt vooraf een duidelijke offerte, zodat u weet waar u aan toe bent.</p></details></div>
+    <h2 class="center reveal">Veelgestelde vragen</h2>
+    <div class="faq reveal"><details><summary>Kan ik een laadpaal laten installeren bij mijn woning?</summary><p>Meestal wel, als u een eigen oprit of parkeerplaats heeft. Wij bekijken of uw meterkast en aansluiting voldoende ruimte bieden en adviseren zo nodig over een uitbreiding. Parkeert u aan de openbare weg, dan gelden de regels van uw gemeente.</p></details><details><summary>Is mijn woning geschikt voor een thuisbatterij?</summary><p>Dat hangt af van uw zonnepanelen, uw omvormer, uw stroomverbruik en de ruimte in en rond uw meterkast. Met de configurator op deze site krijgt u een eerste indicatie. Daarna kijken wij naar uw bestaande installatie en vertellen wij eerlijk of een thuisbatterij voor u zinvol is.</p></details><details><summary>Wanneer moet mijn groepenkast worden vervangen?</summary><p>Een groepenkast heeft geen vaste houdbaarheidsdatum. Vervangen is verstandig als de kast nog met stoppen werkt, als er geen aardlekschakelaar in zit, als groepen regelmatig uitvallen of als u extra groepen nodig heeft voor een inductiekookplaat, laadpaal of warmtepomp.</p></details><details><summary>Kan ik foto's meesturen voor een offerte?</summary><p>Ja, graag zelfs. Een foto van uw meterkast en van de plek waar het werk moet gebeuren geeft ons snel een goed beeld. Soms is daarnaast een bezoek nodig om een nauwkeurige offerte te maken.</p></details><details><summary>Wat bepaalt de kosten van elektrotechnisch werk?</summary><p>De omvang van het werk, de staat van uw bestaande installatie, de gekozen materialen en hoe goed leidingen bereikbaar zijn. U ontvangt vooraf een duidelijke offerte, zodat u weet waar u aan toe bent.</p></details></div>
   </div>
 </section>
 
@@ -167,11 +177,11 @@
       </ul>
     </div>
     <form class="contact-form" id="contact-form" data-to="info@ohandelektra.nl" novalidate>
-      <div class="two">
+      <div class="two-col">
         <div class="field"><label for="c-naam">Naam</label><input id="c-naam" name="naam" type="text" autocomplete="name" required></div>
         <div class="field"><label for="c-telefoon">Telefoonnummer</label><input id="c-telefoon" name="telefoon" type="tel" autocomplete="tel"></div>
       </div>
-      <div class="two">
+      <div class="two-col">
         <div class="field"><label for="c-email">E-mailadres</label><input id="c-email" name="email" type="email" autocomplete="email" required></div>
         <div class="field"><label for="c-postcode">Postcode</label><input id="c-postcode" name="postcode" type="text" autocomplete="postal-code"></div>
       </div>
@@ -217,6 +227,6 @@
     </div>
   </div>
 </footer>
-<script src="assets/calc.js" defer></script><script src="assets/site.js" defer></script>
+<script src="assets/calc.js" defer></script><script src="assets/site.js" defer></script><script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script><script type="module" src="assets/scene.js"></script>
 </body>
 </html>
