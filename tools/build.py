@@ -6,9 +6,12 @@ Kop, voet en contactblok staan hier één keer; elke pagina is een stuk HTML
 in PAGES. Bedrijfsgegevens staan bovenaan in BEDRIJF: pas ze daar aan en
 bouw opnieuw, dan kloppen ze overal (ook in de gegevens voor Google).
 """
+import html
 import json
 import pathlib
+import re
 from datetime import date
+from html.parser import HTMLParser
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -16,21 +19,36 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # pas dan alleen deze regel aan.
 SITE_URL = "https://westsaid83.github.io/ohand-elektra/"
 
-# Aangeleverd door Said op 25 november 2026, van een factuur van het bedrijf.
-# Het e-mailadres blijft bewust info@ohandelektra.nl.
+# Alles wat de eigenaar zelf kan wijzigen staat in content/site.json en wordt
+# beheerd via de beheerpagina (/beheer/). Dit script leest dat bestand; pas
+# gegevens, teksten, foto's en projecten dus daar aan en niet hier.
+CONTENT = json.loads((ROOT / "content" / "site.json").read_text(encoding="utf-8"))
+
+
+def _telefoon_link(tekst):
+    """'06 84 86 13 58' wordt '+31684861358'. Een nummer dat al met + of 00 begint blijft internationaal."""
+    t = re.sub(r"[^0-9+]", "", tekst)
+    if t.startswith("00"):
+        return "+" + t[2:]
+    if t.startswith("+"):
+        return t
+    return "+31" + t.lstrip("0")
+
+
+_b = CONTENT["bedrijf"]
 BEDRIJF = {
-    "naam": "Ohand Elektra",
-    "telefoon_tekst": "06 84 86 13 58",
-    "telefoon_link": "+31684861358",
-    "email": "info@ohandelektra.nl",
-    "straat": "Vanenburg 13 B",
-    "postcode": "6714 HG",
-    "plaats": "Ede",
-    "adres": "Vanenburg 13 B, 6714 HG Ede",
-    "kvk": "69415471",
-    "btw": "NL001556853B46",
-    "iban": "NL87 INGB 0006 7063 92",
-    "uren": "Maandag t/m vrijdag, 08.00 tot 17.00 uur",
+    "naam": _b["naam"],
+    "telefoon_tekst": _b["telefoon"],
+    "telefoon_link": _telefoon_link(_b["telefoon"]),
+    "email": _b["email"],
+    "straat": _b["straat"],
+    "postcode": _b["postcode"],
+    "plaats": _b["plaats"],
+    "adres": f'{_b["straat"]}, {_b["postcode"]} {_b["plaats"]}',
+    "kvk": _b["kvk"],
+    "btw": _b["btw"],
+    "iban": _b["iban"],
+    "uren": _b["uren"],
     "gegevens_definitief": True,
 }
 
@@ -53,6 +71,8 @@ ICON_PATHS = {
     "fase": '<path d="M13 2L5 13.5h6L10 22l8-11.5h-6z"/>',
     "reken": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.5 12h1M12 12h1M15.5 12h0M8.5 16h1M12 16h1M15.5 16h0"/>',
     "stekker": '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+    "pijl-links": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    "pijl-rechts": '<path d="M5 12h14M13 6l6 6-6 6"/>',
     "tel": '<path d="M5 4h4l1.5 4.5-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2L20 15v4a1 1 0 0 1-1 1A15 15 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
     "persoon": '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
     "offerte": '<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h4"/>',
@@ -94,11 +114,146 @@ NAV = [
 ]
 
 
+# De vaste plekken voor foto's op de site, met de naam die de beheerpagina toont.
+FOTO_PLEKKEN = {
+    "laadpaal-oprit": "Laadpaal op de oprit (achtergrond homepage, kop laadpaalpagina)",
+    "laadpaal-gevel": "Laadpaal aan de gevel (kaart homepage, laadpaalpagina)",
+    "thuisbatterij": "Thuisbatterij (kaart homepage)",
+    "groepenkast-detail": "Groepenkast van dichtbij (kaart homepage, kop elektrapagina)",
+    "groepenkast": "Groepenkast (thuisbatterij- en elektrapagina)",
+    "bedrading-verbouwing": "Bedrading bij verbouwing (elektrapagina)",
+    "zakelijk-schakelkast": "Schakelkast (elektrapagina, zakelijk)",
+}
+
+
 def img(name, alt, sizes="(max-width: 860px) 100vw, 50vw", w=1200, h=900, lazy=True):
-    return (f'<img src="{{base}}images/{name}-1200.webp" '
-            f'srcset="{{base}}images/{name}-640.webp 640w, {{base}}images/{name}-1200.webp 1200w" '
-            f'sizes="{sizes}" width="{w}" height="{h}" alt="{alt}"'
+    eigen = CONTENT.get("afbeeldingen", {}).get(name)
+    if eigen:
+        # Via de beheerpagina vervangen: JPEG in twee breedtes, zonder vaste verhouding.
+        groot, klein, maten = f"{eigen}-1200.jpg", f"{eigen}-640.jpg", ""
+    else:
+        groot, klein, maten = f"images/{name}-1200.webp", f"images/{name}-640.webp", f' width="{w}" height="{h}"'
+    return (f'<img src="{{base}}{groot}" srcset="{{base}}{klein} 640w, {{base}}{groot} 1200w" '
+            f'sizes="{sizes}"{maten} alt="{alt}"'
             + (' loading="lazy" decoding="async"' if lazy else ' fetchpriority="high"') + '>')
+
+
+def projecten_html():
+    """De projectenstrook: grote foto's die horizontaal doorschuiven, met filter en vergroting."""
+    items = CONTENT.get("projecten", [])
+    if not items:
+        return ""
+    soorten = []
+    for it in items:
+        if it["soort"] not in soorten:
+            soorten.append(it["soort"])
+    e = html.escape
+    filters = '<button type="button" class="is-on" data-soort="">Alles</button>' + ''.join(
+        f'<button type="button" data-soort="{e(x)}">{e(x)}</button>' for x in soorten)
+    dia = ''.join(f'''
+        <li class="dia" data-soort="{e(it["soort"])}">
+          <button type="button" class="dia-knop" aria-label="Vergroot foto: {e(it["titel"])}">
+            <img src="{{base}}{it["foto"]}-1200.jpg" srcset="{{base}}{it["foto"]}-640.jpg 640w, {{base}}{it["foto"]}-1200.jpg 1200w" sizes="(max-width: 700px) 86vw, 640px" alt="{e(it["titel"])}" loading="lazy" decoding="async">
+          </button>
+          <div class="dia-tekst">
+            <span class="dia-soort">{e(it["soort"])}{" (voorbeeld)" if it.get("voorbeeld") else ""}</span>
+            <h3>{e(it["titel"])}</h3>
+            <p>{e(it.get("tekst", ""))}</p>
+          </div>
+        </li>''' for it in items)
+    heeft_voorbeeld = any(it.get("voorbeeld") for it in items)
+    noot = '<p class="fine center">De foto\'s met "voorbeeld" zijn sfeerbeelden. Ze maken plaats voor eigen projecten.</p>' if heeft_voorbeeld else ''
+    return f'''
+<section class="section projecten" id="projecten" aria-labelledby="projecten-kop">
+  <div class="wrap">
+    <div class="proj-kop reveal">
+      <div>
+        <h2 id="projecten-kop">Projecten</h2>
+        <p class="lead">Werk dat wij hebben opgeleverd. Klik op een foto om hem groot te zien.</p>
+      </div>
+      <div class="proj-nav">
+        <button type="button" class="proj-pijl" data-richting="-1" aria-label="Vorige projecten">{icon("pijl-links")}</button>
+        <span class="proj-teller" aria-live="polite"></span>
+        <button type="button" class="proj-pijl" data-richting="1" aria-label="Volgende projecten">{icon("pijl-rechts")}</button>
+      </div>
+    </div>
+    <div class="proj-filter reveal" role="group" aria-label="Toon projecten per soort">{filters}</div>
+  </div>
+  <ul class="strook" tabindex="0" aria-label="Projectfoto's, schuif opzij voor meer">{dia}</ul>
+  <div class="wrap"><div class="proj-draad" aria-hidden="true"><i></i></div>{noot}</div>
+  <dialog class="licht" aria-label="Vergrote projectfoto">
+    <button type="button" class="licht-sluit" aria-label="Sluiten">Sluiten</button>
+    <img alt=""><p></p>
+  </dialog>
+</section>
+'''
+
+
+class _TekstLezer(HTMLParser):
+    """Verzamelt alle zichtbare tekststukjes van een pagina, in volgorde."""
+    OVERSLAAN = {"script", "style", "svg", "title", "datalist", "select"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.diep = 0
+        self.stukken = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.OVERSLAAN:
+            self.diep += 1
+
+    def handle_endtag(self, tag):
+        if tag in self.OVERSLAAN and self.diep:
+            self.diep -= 1
+
+    def handle_data(self, data):
+        t = " ".join(data.split())
+        if not self.diep and len(t) > 1 and re.search(r"[A-Za-zÀ-ÿ]", t):
+            self.stukken.append(t)
+
+
+def teksten_van(pagina_html):
+    lezer = _TekstLezer()
+    lezer.feed(pagina_html)
+    uniek = []
+    for t in lezer.stukken:
+        if t not in uniek:
+            uniek.append(t)
+    return uniek
+
+
+_BLOK = re.compile(r"(<script\b.*?</script>|<style\b.*?</style>|<svg\b.*?</svg>)", re.S)
+_TEKST = re.compile(r">([^<>]+)<")
+
+
+def pas_teksten_toe(pagina_html, wijzigingen):
+    """Vervangt tekststukjes door wat de eigenaar in het beheer heeft ingevuld.
+
+    De sleutel is de oorspronkelijke tekst. Verandert die hier in het script,
+    dan past de wijziging niet meer en verschijnt de nieuwe standaardtekst.
+    """
+    if not wijzigingen:
+        return pagina_html
+
+    def tekst(m):
+        ruw = m.group(1)
+        kaal = " ".join(html.unescape(ruw).split())
+        if kaal not in wijzigingen:
+            return m.group(0)
+        voor = ruw[:len(ruw) - len(ruw.lstrip())]
+        na = ruw[len(ruw.rstrip()):]
+        return ">" + voor + html.escape(wijzigingen[kaal], quote=False) + na + "<"
+
+    delen = _BLOK.split(pagina_html)
+    for i, deel in enumerate(delen):
+        if i % 2 == 0:
+            delen[i] = _TEKST.sub(tekst, deel)
+        elif deel.startswith('<script type="application/ld+json"'):
+            # Dezelfde tekst staat ook in de gegevens voor zoekmachines (bijvoorbeeld de veelgestelde vragen).
+            for oud, nieuw in wijzigingen.items():
+                deel = deel.replace(json.dumps(oud, ensure_ascii=False)[1:-1], json.dumps(nieuw, ensure_ascii=False)[1:-1])
+            delen[i] = deel
+    return "".join(delen)
 
 
 def faq_html(items):
@@ -276,6 +431,7 @@ def layout(page):
     <div class="foot-base">
       <span>© {date.today().year} {b["naam"]}</span>
       <span><a href="{base}privacyverklaring/">Privacyverklaring</a></span>
+      <span><a href="{base}beheer/" rel="nofollow">Beheer</a></span>
       <span>Foto's: Unsplash (sfeerbeelden)</span>
     </div>
   </div>
@@ -405,6 +561,8 @@ HOME = f'''
     {diensten_raster()}
   </div>
 </section>
+
+{projecten_html()}
 
 <section class="section">
   <div class="wrap">
@@ -962,10 +1120,37 @@ PAGES = [
 
 
 def main():
+    # Bedrijfsgegevens en projecten hebben in het beheer hun eigen invulvelden;
+    # die horen niet nog eens in de lijst met losse teksten.
+    vast = [str(v) for v in CONTENT["bedrijf"].values()] + [BEDRIJF["adres"]]
+    eigen = set()
+    for it in CONTENT.get("projecten", []):
+        eigen.update([it["titel"], it.get("tekst", ""), it["soort"], it["soort"] + " (voorbeeld)"])
+
+    def eigen_veld(t):
+        # Korte waarden (de plaatsnaam, de bedrijfsnaam) komen ook in gewone zinnen voor:
+        # die tellen alleen als de hele tekst eruit bestaat.
+        return t in eigen or any(v and (t == v or (len(v) >= 14 and v in t)) for v in vast)
+
+    wijzigingen = {k: v for k, v in CONTENT.get("teksten", {}).items() if v.strip() and v != k}
+    lijst, gezien = [], set()
     for p in PAGES:
         out = ROOT / p["path"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(layout(p), encoding="utf-8")
+        pagina = layout(p)
+        nieuw = [t for t in teksten_van(pagina) if t not in gezien and not eigen_veld(t)]
+        gezien.update(nieuw)
+        lijst.append({"pagina": p["crumb"], "adres": p["path"], "teksten": nieuw})
+        out.write_text(pas_teksten_toe(pagina, wijzigingen), encoding="utf-8")
+    # Voor de beheerpagina: alle oorspronkelijke teksten per pagina, en de vaste fotoplekken.
+    (ROOT / "beheer").mkdir(exist_ok=True)
+    (ROOT / "beheer" / "teksten.json").write_text(json.dumps(
+        {"paginas": lijst, "fotoplekken": FOTO_PLEKKEN}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    vervallen = [k for k in wijzigingen if k not in gezien]
+    if vervallen:
+        print(f"Let op: {len(vervallen)} tekstwijziging(en) passen niet meer op een bestaande tekst:")
+        for k in vervallen:
+            print("  -", k[:70])
     # 404 staat op de hoofdmap en wordt vanaf elk pad getoond: daarom absolute verwijzingen.
     from urllib.parse import urlparse
     base = urlparse(SITE_URL).path
@@ -976,7 +1161,7 @@ def main():
     urls = ''.join(f'<url><loc>{SITE_URL}{p["path"]}</loc><lastmod>{today}</lastmod></url>' for p in PAGES)
     (ROOT / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8")
-    (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /beheer/\n\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8")
     print(f"{len(PAGES) + 1} pagina's gebouwd")
 
 

@@ -1,0 +1,42 @@
+name: Website bouwen
+
+# De beheerpagina (/beheer/) slaat alleen content/site.json en foto's op.
+# Deze taak maakt daar de pagina's van en zet ze terug in de repository,
+# waarna GitHub Pages ze uitlevert.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/**'
+      - 'tools/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bouw
+  cancel-in-progress: false
+
+jobs:
+  bouw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Pagina's bouwen
+        run: python3 tools/build.py
+      - name: Gebouwde pagina's vastleggen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Geen wijzigingen in de gebouwde pagina's."
+          else
+            git commit -m "Website opnieuw gebouwd na een wijziging in het beheer"
+            git push
+          fi
