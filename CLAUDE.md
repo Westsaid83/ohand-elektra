@@ -13,12 +13,57 @@ Dat schrijft `index.html`, `laadpaal-installeren/`, `thuisbatterij/`,
 opnieuw. De gebouwde bestanden worden wél gecommit, want Pages serveert ze
 rechtstreeks.
 
-- Bedrijfsgegevens: `BEDRIJF` bovenaan `tools/build.py`. Telefoon, adres,
-  KvK, btw-nummer en IBAN zijn door Said aangeleverd op 25 november 2026 en
-  staan ook in de JSON-LD. Het e-mailadres blijft `info@ohandelektra.nl`.
+- Bedrijfsgegevens, projecten, vervangen foto's en aangepaste teksten staan
+  in `content/site.json`. Dat bestand wordt beheerd via de beheerpagina; zet
+  zulke gegevens dus niet meer in `tools/build.py`.
 - Adres van de site: `SITE_URL`. Bij een eigen domein alleen die regel
   aanpassen (canonical, sitemap, Open Graph en de 404 volgen vanzelf).
 - Stijl: `assets/site.css`. Gedrag: `assets/site.js`.
+
+## Het beheer (`/beheer/`)
+
+Van Said, 26 november 2026: een backend waar een leek tekst, mailadres en
+afbeeldingen kan wijzigen, en een plek voor projectfoto's.
+
+De site staat op GitHub Pages en heeft geen server. Het beheer is daarom een
+losse pagina (`beheer/index.html` en `beheer/beheer.js`, met de hand
+geschreven, niet door `build.py`) die rechtstreeks met de GitHub-API praat:
+
+1. De eigenaar logt in met een fine-grained toegangssleutel (alleen deze
+   repository, Contents lezen en schrijven). De sleutel blijft in zijn
+   browser; de inlogpagina legt uit hoe hij hem aanmaakt.
+2. Opslaan maakt ÉÉN commit op `main` met `content/site.json` en de nieuwe
+   foto's (git-data-API: blobs, tree, commit, ref).
+3. `.github/workflows/bouw.yml` draait daarop `tools/build.py` en legt de
+   gebouwde pagina's vast. Pages levert ze uit.
+
+Wat er te beheren is:
+
+- **Projecten**: titel, soort, omschrijving, foto, volgorde. Foto's worden in
+  de browser verkleind tot JPEG van 1200 en 640 pixels
+  (`images/projecten/p-...`). JPEG en niet WebP, omdat niet elke browser
+  WebP kan maken. De zes eerste projecten zijn sfeerbeelden met
+  `"voorbeeld": true`; de site zet er "(voorbeeld)" bij tot de foto is
+  vervangen.
+- **Bedrijfsgegevens**: het blok `bedrijf`. De bel-link wordt uit het getoonde
+  nummer afgeleid (`_telefoon_link`).
+- **Vaste foto's**: `FOTO_PLEKKEN` in `build.py`. Een vervangen foto staat in
+  `afbeeldingen` en komt in `images/upload/`.
+- **Teksten**: `build.py` schrijft alle zichtbare tekststukjes per pagina naar
+  `beheer/teksten.json`. Een wijziging wordt opgeslagen als
+  `"oorspronkelijke tekst": "nieuwe tekst"` en bij het bouwen vervangen, ook
+  in de JSON-LD. Verandert de oorspronkelijke tekst in `build.py`, dan past
+  de wijziging niet meer; de bouw meldt dat. Teksten die het script in de
+  browser invult (vervolgvragen van het stappenformulier, uitkomsten van de
+  configurator) en de titel en beschrijving voor zoekmachines zijn niet via
+  het beheer te wijzigen.
+
+Let op bij eigen werk aan de code: de eigenaar en de bouwtaak zetten ook
+commits op `main`. Begin dus altijd met `git fetch` en bouw opnieuw vóór een
+push. Oude foto's worden niet opgeruimd als een project wordt verwijderd.
+
+Getest met een nagebootste GitHub (Playwright onderschept `api.github.com`),
+niet met een echte sleutel.
 
 ## De thuisbatterij-configurator
 

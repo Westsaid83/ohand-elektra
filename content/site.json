@@ -1,0 +1,61 @@
+{
+  "_uitleg": "Dit bestand wordt beheerd via /beheer/. Wijzig het daar; de website wordt daarna automatisch opnieuw gebouwd.",
+  "bedrijf": {
+    "naam": "Ohand Elektra",
+    "telefoon": "06 84 86 13 58",
+    "email": "info@ohandelektra.nl",
+    "straat": "Vanenburg 13 B",
+    "postcode": "6714 HG",
+    "plaats": "Ede",
+    "kvk": "69415471",
+    "btw": "NL001556853B46",
+    "iban": "NL87 INGB 0006 7063 92",
+    "uren": "Maandag t/m vrijdag, 08.00 tot 17.00 uur"
+  },
+  "teksten": {},
+  "afbeeldingen": {},
+  "projecten": [
+    {
+      "titel": "Laadpaal aan de gevel",
+      "soort": "Laadpaal",
+      "tekst": "Laadpaal met eigen groep en load balancing, kabel netjes weggewerkt.",
+      "foto": "images/projecten/voorbeeld-laadpaal-gevel",
+      "voorbeeld": true
+    },
+    {
+      "titel": "Thuisbatterij met omvormer",
+      "soort": "Thuisbatterij",
+      "tekst": "Batterij en omvormer naast de meterkast, gekoppeld aan de bestaande zonnepanelen.",
+      "foto": "images/projecten/voorbeeld-thuisbatterij",
+      "voorbeeld": true
+    },
+    {
+      "titel": "Nieuwe groepenkast",
+      "soort": "Groepenkast",
+      "tekst": "Oude kast vervangen door een kast met aardlekautomaten en ruimte voor uitbreiding.",
+      "foto": "images/projecten/voorbeeld-groepenkast",
+      "voorbeeld": true
+    },
+    {
+      "titel": "Laadpaal op de oprit",
+      "soort": "Laadpaal",
+      "tekst": "Laadpunt van 11 kW op een 3-fase aansluiting.",
+      "foto": "images/projecten/voorbeeld-laadpaal-oprit",
+      "voorbeeld": true
+    },
+    {
+      "titel": "Elektra bij een verbouwing",
+      "soort": "Verbouwing",
+      "tekst": "Nieuwe bedrading en wandcontactdozen in een verbouwde woning.",
+      "foto": "images/projecten/voorbeeld-bedrading-verbouwing",
+      "voorbeeld": true
+    },
+    {
+      "titel": "Schakelkast in een bedrijfspand",
+      "soort": "Zakelijk",
+      "tekst": "Verdeelinrichting voor een utiliteitsproject.",
+      "foto": "images/projecten/voorbeeld-zakelijk-schakelkast",
+      "voorbeeld": true
+    }
+  ]
+}

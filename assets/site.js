@@ -102,6 +102,57 @@
     });
   }
 
+  /* Projectenstrook: pijlen, filter per soort, teller, voortgangsbalk en vergroting.
+     Schuiven zelf doet de browser (scroll-snap), dus vegen en het toetsenbord werken vanzelf. */
+  var strook = $('.strook');
+  if (strook) {
+    var dias = $$('.dia', strook), teller = $('.proj-teller'), draad = $('.proj-draad i');
+    var pijlen = $$('.proj-pijl'), licht = $('.licht');
+    var zichtbaar = function () { return dias.filter(function (d) { return !d.hidden; }); };
+    var stand = function () {
+      var lijst = zichtbaar(); if (!lijst.length) return;
+      var links = strook.scrollLeft, beste = 0, afstand = Infinity;
+      lijst.forEach(function (d, i) { var a = Math.abs(d.offsetLeft - lijst[0].offsetLeft - links); if (a < afstand) { afstand = a; beste = i; } });
+      var max = strook.scrollWidth - strook.clientWidth;
+      var einde = max <= 2 || links >= max - 2;
+      if (einde) beste = lijst.length - 1;
+      teller.textContent = max <= 2 ? (lijst.length === 1 ? '1 project' : lijst.length + ' projecten') : (beste + 1) + ' van ' + lijst.length;
+      draad.style.width = Math.max(8, max <= 2 ? 100 : Math.round((links / max) * 100)) + '%';
+      pijlen[0].disabled = links <= 2;
+      pijlen[1].disabled = einde;
+    };
+    var wacht = false;
+    strook.addEventListener('scroll', function () { if (!wacht) { wacht = true; requestAnimationFrame(function () { wacht = false; stand(); }); } }, { passive: true });
+    window.addEventListener('resize', stand);
+    pijlen.forEach(function (p) {
+      p.addEventListener('click', function () {
+        var d = zichtbaar()[0]; if (!d) return;
+        strook.scrollBy({ left: +p.dataset.richting * (d.offsetWidth + 22), behavior: 'smooth' });
+      });
+    });
+    $$('.proj-filter button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        $$('.proj-filter button').forEach(function (x) { x.classList.toggle('is-on', x === b); });
+        dias.forEach(function (d) { d.hidden = !!b.dataset.soort && d.dataset.soort !== b.dataset.soort; });
+        strook.scrollTo({ left: 0 });
+        stand();
+      });
+    });
+    if (licht && licht.showModal) {
+      strook.addEventListener('click', function (e) {
+        var k = e.target.closest ? e.target.closest('.dia-knop') : null; if (!k) return;
+        var foto = $('img', k);
+        $('img', licht).src = foto.currentSrc.replace('-640.jpg', '-1200.jpg');
+        $('img', licht).alt = foto.alt;
+        $('p', licht).textContent = foto.alt;
+        licht.showModal();
+      });
+      $('.licht-sluit', licht).addEventListener('click', function () { licht.close(); });
+      licht.addEventListener('click', function (e) { if (e.target === licht) licht.close(); });
+    }
+    stand();
+  }
+
   /* Inhoud die binnenkomt bij scrollen */
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (items) {

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Beheer | Ohand Elektra</title>
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<style>
+  :root { --ink: #111820; --muted: #5d6b78; --line: #dfe5ea; --mist: #f3f5f7; --volt: #ffc533; --blue: #0b63ce; --red: #b3261e; --green: #14805a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 17px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1d2730; background: var(--mist); padding-bottom: 110px; }
+  h1 { font-size: 1.5rem; margin: 0; color: var(--ink); }
+  h2 { font-size: 1.35rem; margin: 0 0 6px; color: var(--ink); }
+  h3 { font-size: 1.05rem; margin: 0 0 4px; color: var(--ink); }
+  p { margin: 0 0 12px; }
+  .uitleg { color: var(--muted); max-width: 70ch; }
+  .wrap { width: min(100% - 32px, 980px); margin-inline: auto; }
+  header.top { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+  header.top .wrap { display: flex; align-items: center; gap: 16px; min-height: 64px; flex-wrap: wrap; padding-block: 8px; }
+  header.top a { margin-left: auto; color: var(--blue); font-weight: 600; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 22px 0 18px; }
+  .tabs button { font: inherit; font-weight: 650; min-height: 50px; padding: 10px 20px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .kaart { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 0 0 1px var(--line); margin-bottom: 18px; }
+  label { display: block; font-weight: 650; color: var(--ink); margin-bottom: 6px; }
+  .hint { font-size: .9rem; color: var(--muted); margin: 4px 0 0; font-weight: 400; }
+  input[type=text], input[type=email], input[type=password], input[type=search], textarea { width: 100%; font: inherit; color: var(--ink); padding: 12px 14px; min-height: 50px; border: 1.5px solid #b4c0ca; border-radius: 10px; background: #fff; }
+  textarea { resize: vertical; min-height: 54px; }
+  input:focus, textarea:focus, button:focus-visible, a:focus-visible { outline: 3px solid #7db8ff; outline-offset: 2px; }
+  .veld { margin-bottom: 18px; }
+  .twee { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+  @media (max-width: 640px) { .twee { grid-template-columns: 1fr; } }
+  .knop { font: inherit; font-weight: 650; min-height: 50px; padding: 10px 22px; border-radius: 12px; border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+  .knop--geel { background: var(--volt); color: #111; }
+  .knop--donker { background: var(--ink); color: #fff; }
+  .knop--rand { background: #fff; color: var(--ink); border-color: #9aa7b3; }
+  .knop--rood { background: #fff; color: var(--red); border-color: #e0b4b0; }
+  .knop--klein { min-height: 44px; padding: 6px 14px; font-size: .95rem; }
+  .knop:disabled { opacity: .5; cursor: default; }
+  .rij { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .project { display: grid; grid-template-columns: 200px 1fr; gap: 20px; }
+  .project img, .plek img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: var(--mist); display: block; }
+  @media (max-width: 640px) { .project { grid-template-columns: 1fr; } }
+  .label-voorbeeld { display: inline-block; background: #fff6da; color: #4a3a05; font-size: .85rem; font-weight: 650; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+  .drop { border: 2px dashed #9aa7b3; border-radius: 16px; padding: 34px 20px; text-align: center; background: #fff; margin-bottom: 18px; cursor: pointer; display: block; }
+  .drop.is-over { border-color: var(--blue); background: #eef5ff; }
+  .drop strong { display: block; font-size: 1.15rem; color: var(--ink); }
+  .drop input, .verborgen { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+  .plekken { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+  .plek { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 0 0 1px var(--line); }
+  .plek h3 { margin: 12px 0 10px; font-size: .98rem; }
+  .tekst { padding: 16px 0; border-top: 1px solid var(--line); }
+  .tekst:first-child { border-top: 0; }
+  .tekst small { display: block; color: var(--muted); margin-bottom: 6px; }
+  .tekst.is-gewijzigd textarea { border-color: var(--green); background: #f3fbf7; }
+  .paginas { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .paginas button { font: inherit; font-weight: 600; min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; cursor: pointer; color: var(--ink); }
+  .paginas button.is-on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .balk { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; box-shadow: 0 -1px 0 var(--line), 0 -10px 30px rgba(17, 24, 32, .1); z-index: 20; }
+  .balk .wrap { display: flex; align-items: center; gap: 16px; padding-block: 14px; flex-wrap: wrap; }
+  .balk p { margin: 0; flex: 1; min-width: 200px; font-weight: 600; }
+  .balk .goed { color: var(--green); } .balk .fout { color: var(--red); }
+  .melding { background: #fdecea; color: #7a1a14; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+  details { margin-top: 14px; } summary { cursor: pointer; font-weight: 650; color: var(--blue); }
+  ol { padding-left: 1.3em; } ol li { margin-bottom: 8px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>Beheer Ohand Elektra</h1>
+    <a href="../" target="_blank" rel="noopener">Bekijk de website</a>
+    <button class="knop knop--rand knop--klein" id="uitloggen" type="button" hidden>Uitloggen</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Inloggen -->
+  <section id="inlog" class="kaart" style="margin-top:28px" hidden>
+    <h2>Inloggen</h2>
+    <p class="uitleg">Plak hier uw toegangssleutel. U hoeft dit op dit apparaat maar één keer te doen.</p>
+    <div class="melding" id="inlog-fout" hidden></div>
+    <form id="inlog-form">
+      <div class="veld">
+        <label for="sleutel">Toegangssleutel</label>
+        <input id="sleutel" type="password" autocomplete="off" required>
+      </div>
+      <button class="knop knop--geel" type="submit">Inloggen</button>
+    </form>
+    <details>
+      <summary>Ik heb nog geen sleutel</summary>
+      <p class="uitleg" style="margin-top:10px">De sleutel wordt één keer aangemaakt door de beheerder van het GitHub-account. Daarna werkt hij tot de gekozen einddatum.</p>
+      <ol class="uitleg">
+        <li>Ga naar <b>github.com</b>, klik rechtsboven op uw foto en kies <b>Settings</b>.</li>
+        <li>Kies onderaan links <b>Developer settings</b>, dan <b>Personal access tokens</b>, dan <b>Fine-grained tokens</b>.</li>
+        <li>Klik op <b>Generate new token</b>. Geef hem een naam, bijvoorbeeld "Beheer Ohand Elektra", en kies een einddatum.</li>
+        <li>Kies bij <b>Repository access</b> voor <b>Only select repositories</b> en selecteer <b>ohand-elektra</b>.</li>
+        <li>Zet bij <b>Permissions</b>, <b>Repository permissions</b>, <b>Contents</b> op <b>Read and write</b>.</li>
+        <li>Klik op <b>Generate token</b> en kopieer de sleutel. Plak hem hierboven.</li>
+      </ol>
+      <p class="uitleg">De sleutel wordt alleen in deze browser bewaard. Geef hem aan niemand en stuur hem niet per mail.</p>
+    </details>
+  </section>
+
+  <!-- Beheer -->
+  <div id="app" hidden>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="projecten" aria-selected="true">Projecten</button>
+      <button role="tab" data-tab="gegevens" aria-selected="false">Bedrijfsgegevens</button>
+      <button role="tab" data-tab="fotos" aria-selected="false">Foto's op de site</button>
+      <button role="tab" data-tab="teksten" aria-selected="false">Teksten</button>
+    </div>
+
+    <section data-paneel="projecten">
+      <p class="uitleg">De projecten staan op de homepage in de volgorde van deze lijst. Wijzigingen komen pas online als u onderaan op <b>Opslaan en publiceren</b> klikt.</p>
+      <label class="drop" id="drop">
+        <strong>Foto's toevoegen</strong>
+        Sleep foto's hierheen of klik om ze te kiezen. Elke foto wordt een project.
+        <input type="file" id="nieuw" accept="image/*" multiple>
+      </label>
+      <div id="projecten"></div>
+    </section>
+
+    <section data-paneel="gegevens" hidden>
+      <p class="uitleg">Deze gegevens staan op elke pagina: in de menubalk, bij contact en onderaan.</p>
+      <div class="kaart" id="gegevens"></div>
+    </section>
+
+    <section data-paneel="fotos" hidden>
+      <p class="uitleg">De vaste foto's van de website. Kies bij voorkeur liggende foto's; de site snijdt ze zelf bij.</p>
+      <div class="plekken" id="plekken"></div>
+    </section>
+
+    <section data-paneel="teksten" hidden>
+      <p class="uitleg">Kies een pagina en pas de tekst aan in het vak. Een aangepaste tekst krijgt een groene rand. Maakt u een vak leeg, dan komt de oorspronkelijke tekst terug.</p>
+      <div class="paginas" id="paginas"></div>
+      <div class="veld"><label for="zoek">Zoek een tekst</label><input id="zoek" type="search" placeholder="Typ een woord dat in de tekst staat"></div>
+      <div class="kaart" id="teksten"></div>
+    </section>
+  </div>
+</main>
+
+<div class="balk" id="balk" hidden>
+  <div class="wrap">
+    <p id="status">Er zijn geen wijzigingen.</p>
+    <button class="knop knop--geel" id="opslaan" type="button" disabled>Opslaan en publiceren</button>
+  </div>
+</div>
+
+<script src="beheer.js"></script>
+</body>
+</html>
