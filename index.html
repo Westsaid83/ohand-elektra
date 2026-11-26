@@ -112,6 +112,8 @@
   </div>
 </section>
 
+
+
 <section class="section">
   <div class="wrap">
     <div class="center reveal">
@@ -151,17 +153,18 @@
     <div class="proj-kop reveal">
       <div>
         <h2 id="projecten-kop">Projecten</h2>
-        <p class="lead">Werk dat wij hebben opgeleverd. Klik op een foto om hem groot te zien.</p>
+        <p class="lead">Werk dat wij hebben opgeleverd. Klik op de voorste foto om hem groot te zien.</p>
       </div>
       <div class="proj-nav">
         <button type="button" class="proj-pijl" data-richting="-1" aria-label="Vorige projecten"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
         <span class="proj-teller" aria-live="polite"></span>
         <button type="button" class="proj-pijl" data-richting="1" aria-label="Volgende projecten"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <button type="button" class="proj-pauze" aria-pressed="false" aria-label="Pauzeer de carrousel"><svg class="ic ic-pauze" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="ic ic-speel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
       </div>
     </div>
     <div class="proj-filter reveal" role="group" aria-label="Toon projecten per soort"><button type="button" class="is-on" data-soort="">Alles</button><button type="button" data-soort="Laadpaal">Laadpaal</button><button type="button" data-soort="Thuisbatterij">Thuisbatterij</button><button type="button" data-soort="Groepenkast">Groepenkast</button><button type="button" data-soort="Verbouwing">Verbouwing</button><button type="button" data-soort="Zakelijk">Zakelijk</button></div>
   </div>
-  <ul class="strook" tabindex="0" aria-label="Projectfoto's, schuif opzij voor meer">
+  <ul class="strook" aria-roledescription="carrousel" aria-label="Projectfoto's. Gebruik de pijltjestoetsen of de knoppen om te bladeren.">
         <li class="dia" data-soort="Laadpaal">
           <button type="button" class="dia-knop" aria-label="Vergroot foto: Laadpaal aan de gevel">
             <img src="images/projecten/voorbeeld-laadpaal-gevel-1200.jpg" srcset="images/projecten/voorbeeld-laadpaal-gevel-640.jpg 640w, images/projecten/voorbeeld-laadpaal-gevel-1200.jpg 1200w" sizes="(max-width: 700px) 86vw, 640px" alt="Laadpaal aan de gevel" loading="lazy" decoding="async">
@@ -329,6 +332,7 @@
       <div>
         <a class="brand" href="./"><svg viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" fill="#0f2231"/><path d="M12.6 11.9a9 9 0 1 0 10.8 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square"/><path d="M18 7.5v10" stroke="#ffc533" stroke-width="2.6" stroke-linecap="square"/></svg><span>Ohand<span>Elektra</span></span></a>
         <p>Zelfstandig elektrotechnisch installatiebedrijf voor laadpalen, thuisbatterijen en elektra. Veilig aangelegd, netjes afgewerkt.</p>
+        
       </div>
       <div>
         <h2>Diensten</h2>

@@ -40,6 +40,7 @@
   .knop:disabled { opacity: .5; cursor: default; }
   .rij { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .project { display: grid; grid-template-columns: 200px 1fr; gap: 20px; }
+  .project img.logo { object-fit: contain; padding: 14px; aspect-ratio: 3 / 2; }
   .project img, .plek img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: var(--mist); display: block; }
   @media (max-width: 640px) { .project { grid-template-columns: 1fr; } }
   .label-voorbeeld { display: inline-block; background: #fff6da; color: #4a3a05; font-size: .85rem; font-weight: 650; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
@@ -111,6 +112,7 @@
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="projecten" aria-selected="true">Projecten</button>
       <button role="tab" data-tab="gegevens" aria-selected="false">Bedrijfsgegevens</button>
+      <button role="tab" data-tab="erkenningen" aria-selected="false">Erkenningen</button>
       <button role="tab" data-tab="fotos" aria-selected="false">Foto's op de site</button>
       <button role="tab" data-tab="teksten" aria-selected="false">Teksten</button>
     </div>
@@ -128,6 +130,13 @@
     <section data-paneel="gegevens" hidden>
       <p class="uitleg">Deze gegevens staan op elke pagina: in de menubalk, bij contact en onderaan.</p>
       <div class="kaart" id="gegevens"></div>
+    </section>
+
+    <section data-paneel="erkenningen" hidden>
+      <p class="uitleg">Keurmerken, erkenningen en certificaten. Ze komen op de homepage onder de kop "Erkend en gecertificeerd" en als logo onderaan elke pagina.</p>
+      <p class="uitleg"><b>Gebruik alleen een logo dat u van de instantie zelf heeft gekregen</b>, en vermeld de erkenning precies zoals die op uw certificaat staat. Een keurmerk tonen dat u niet heeft, is misleidende reclame.</p>
+      <div id="erkenningen"></div>
+      <button class="knop knop--donker" type="button" id="erkenning-nieuw">Erkenning toevoegen</button>
     </section>
 
     <section data-paneel="fotos" hidden>

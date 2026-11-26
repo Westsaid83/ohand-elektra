@@ -102,55 +102,116 @@
     });
   }
 
-  /* Projectenstrook: pijlen, filter per soort, teller, voortgangsbalk en vergroting.
-     Schuiven zelf doet de browser (scroll-snap), dus vegen en het toetsenbord werken vanzelf. */
+  /* Projectencarrousel: de foto's zweven in een boog, de middelste staat vooraan.
+     Hij draait vanzelf door en pauzeert zodra iemand ermee bezig is (muis erboven,
+     toetsenbord, vegen, vergroting open) of op de pauzeknop drukt. Bij de
+     instelling 'minder beweging' start hij niet uit zichzelf. */
   var strook = $('.strook');
   if (strook) {
+    var WACHT = 5000;
     var dias = $$('.dia', strook), teller = $('.proj-teller'), draad = $('.proj-draad i');
-    var pijlen = $$('.proj-pijl'), licht = $('.licht');
-    var zichtbaar = function () { return dias.filter(function (d) { return !d.hidden; }); };
-    var stand = function () {
-      var lijst = zichtbaar(); if (!lijst.length) return;
-      var links = strook.scrollLeft, beste = 0, afstand = Infinity;
-      lijst.forEach(function (d, i) { var a = Math.abs(d.offsetLeft - lijst[0].offsetLeft - links); if (a < afstand) { afstand = a; beste = i; } });
-      var max = strook.scrollWidth - strook.clientWidth;
-      var einde = max <= 2 || links >= max - 2;
-      if (einde) beste = lijst.length - 1;
-      teller.textContent = max <= 2 ? (lijst.length === 1 ? '1 project' : lijst.length + ' projecten') : (beste + 1) + ' van ' + lijst.length;
-      draad.style.width = Math.max(8, max <= 2 ? 100 : Math.round((links / max) * 100)) + '%';
-      pijlen[0].disabled = links <= 2;
-      pijlen[1].disabled = einde;
-    };
-    var wacht = false;
-    strook.addEventListener('scroll', function () { if (!wacht) { wacht = true; requestAnimationFrame(function () { wacht = false; stand(); }); } }, { passive: true });
-    window.addEventListener('resize', stand);
-    pijlen.forEach(function (p) {
-      p.addEventListener('click', function () {
-        var d = zichtbaar()[0]; if (!d) return;
-        strook.scrollBy({ left: +p.dataset.richting * (d.offsetWidth + 22), behavior: 'smooth' });
+    var pijlen = $$('.proj-pijl'), pauze = $('.proj-pauze'), licht = $('.licht');
+    var stilGevraagd = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var actief = 0, speelt = !stilGevraagd, redenen = {}, klok = null;
+    var lijst = function () { return dias.filter(function (d) { return !d.hidden; }); };
+
+    var teken = function () {
+      var l = lijst(), n = l.length;
+      if (!n) return;
+      actief = ((actief % n) + n) % n;
+      var stap = Math.min(strook.clientWidth * 0.62, 470);
+      l.forEach(function (d, i) {
+        var af = i - actief;
+        if (n > 2) { if (af > n / 2) af -= n; if (af < -n / 2) af += n; }
+        var ver = Math.abs(af);
+        d.style.transform = 'translateX(' + (af * stap) + 'px) translateZ(' + (-ver * 220) + 'px) rotateY(' + (af * -24) + 'deg)';
+        d.style.opacity = ver > 2 ? 0 : ver === 2 ? 0.35 : 1;
+        d.style.zIndex = 10 - ver;
+        d.style.pointerEvents = ver > 1 ? 'none' : '';
+        d.classList.toggle('is-actief', af === 0);
+        d.setAttribute('aria-hidden', af === 0 ? 'false' : 'true');
+        $('.dia-knop', d).tabIndex = af === 0 ? 0 : -1;
+        $('.dia-knop', d).setAttribute('aria-label', (af === 0 ? 'Vergroot foto: ' : 'Toon project: ') + $('img', d).alt);
       });
+      teller.textContent = (actief + 1) + ' van ' + n;
+      pijlen.forEach(function (p) { p.disabled = n < 2; });
+    };
+
+    /* De balk onder de carrousel loopt vol in de tijd tot de volgende foto. */
+    var herstart = function () {
+      clearTimeout(klok);
+      draad.style.transition = 'none'; draad.style.width = '0%';
+      var loopt = speelt && !Object.keys(redenen).length && lijst().length > 1;
+      strook.classList.toggle('is-stil', !loopt);
+      if (!loopt) { draad.style.width = ((actief + 1) / Math.max(1, lijst().length) * 100) + '%'; return; }
+      void draad.offsetWidth;
+      draad.style.transition = 'width ' + WACHT + 'ms linear'; draad.style.width = '100%';
+      klok = setTimeout(function () { ga(1); }, WACHT);
+    };
+    var ga = function (d) { actief += d; teken(); herstart(); };
+    var rem = function (naam, aan) { if (aan) redenen[naam] = 1; else delete redenen[naam]; herstart(); };
+
+    pijlen.forEach(function (p) { p.addEventListener('click', function () { ga(+p.dataset.richting); }); });
+    var zetKnop = function () {
+      pauze.setAttribute('aria-pressed', speelt ? 'false' : 'true');
+      pauze.setAttribute('aria-label', speelt ? 'Pauzeer de carrousel' : 'Laat de carrousel weer draaien');
+      pauze.classList.toggle('is-gepauzeerd', !speelt);
+    };
+    pauze.addEventListener('click', function () { speelt = !speelt; zetKnop(); herstart(); });
+
+    var sectie = strook.closest('.projecten');
+    strook.addEventListener('mouseenter', function () { rem('muis', true); });
+    strook.addEventListener('mouseleave', function () { rem('muis', false); });
+    sectie.addEventListener('focusin', function (e) { if (strook.contains(e.target)) rem('focus', true); });
+    sectie.addEventListener('focusout', function () { rem('focus', false); });
+    document.addEventListener('visibilitychange', function () { rem('tab', document.hidden); });
+    if ('IntersectionObserver' in window) {
+      redenen.beeld = 1;
+      new IntersectionObserver(function (e) { rem('beeld', !e[0].isIntersecting); }, { threshold: 0.35 }).observe(strook);
+    }
+    strook.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); ga(1); focusActief(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); ga(-1); focusActief(); }
     });
+    var focusActief = function () { var k = $('.dia.is-actief .dia-knop', strook); if (k) k.focus({ preventScroll: true }); };
+
+    /* Vegen */
+    var startX = null, geveegd = false;
+    strook.addEventListener('pointerdown', function (e) { startX = e.clientX; geveegd = false; });
+    strook.addEventListener('pointerup', function (e) {
+      if (startX === null) return;
+      var dx = e.clientX - startX; startX = null;
+      if (Math.abs(dx) > 40) { geveegd = true; ga(dx < 0 ? 1 : -1); }
+    });
+    strook.addEventListener('pointercancel', function () { startX = null; });
+
+    /* Klik: een foto opzij komt naar voren, de voorste wordt vergroot. */
+    strook.addEventListener('click', function (e) {
+      if (geveegd) { geveegd = false; return; }
+      var d = e.target.closest ? e.target.closest('.dia') : null; if (!d) return;
+      var i = lijst().indexOf(d);
+      if (i !== actief) { actief = i; teken(); herstart(); return; }
+      if (!(e.target.closest('.dia-knop')) || !licht || !licht.showModal) return;
+      var foto = $('img', d);
+      $('img', licht).src = foto.currentSrc.replace('-640.jpg', '-1200.jpg');
+      $('img', licht).alt = foto.alt; $('p', licht).textContent = foto.alt;
+      licht.showModal(); rem('licht', true);
+    });
+    if (licht) {
+      $('.licht-sluit', licht).addEventListener('click', function () { licht.close(); });
+      licht.addEventListener('click', function (e) { if (e.target === licht) licht.close(); });
+      licht.addEventListener('close', function () { rem('licht', false); });
+    }
+
     $$('.proj-filter button').forEach(function (b) {
       b.addEventListener('click', function () {
         $$('.proj-filter button').forEach(function (x) { x.classList.toggle('is-on', x === b); });
         dias.forEach(function (d) { d.hidden = !!b.dataset.soort && d.dataset.soort !== b.dataset.soort; });
-        strook.scrollTo({ left: 0 });
-        stand();
+        actief = 0; teken(); herstart();
       });
     });
-    if (licht && licht.showModal) {
-      strook.addEventListener('click', function (e) {
-        var k = e.target.closest ? e.target.closest('.dia-knop') : null; if (!k) return;
-        var foto = $('img', k);
-        $('img', licht).src = foto.currentSrc.replace('-640.jpg', '-1200.jpg');
-        $('img', licht).alt = foto.alt;
-        $('p', licht).textContent = foto.alt;
-        licht.showModal();
-      });
-      $('.licht-sluit', licht).addEventListener('click', function () { licht.close(); });
-      licht.addEventListener('click', function (e) { if (e.target === licht) licht.close(); });
-    }
-    stand();
+    window.addEventListener('resize', teken);
+    zetKnop(); teken(); herstart();
   }
 
   /* Inhoud die binnenkomt bij scrollen */

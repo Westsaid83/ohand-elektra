@@ -71,6 +71,8 @@ ICON_PATHS = {
     "fase": '<path d="M13 2L5 13.5h6L10 22l8-11.5h-6z"/>',
     "reken": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.5 12h1M12 12h1M15.5 12h0M8.5 16h1M12 16h1M15.5 16h0"/>',
     "stekker": '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+    "pauze": '<path d="M9 6v12M15 6v12"/>',
+    "speel": '<path d="M8 5.5v13l11-6.5z"/>',
     "pijl-links": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
     "pijl-rechts": '<path d="M5 12h14M13 6l6 6-6 6"/>',
     "tel": '<path d="M5 4h4l1.5 4.5-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2L20 15v4a1 1 0 0 1-1 1A15 15 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
@@ -169,17 +171,18 @@ def projecten_html():
     <div class="proj-kop reveal">
       <div>
         <h2 id="projecten-kop">Projecten</h2>
-        <p class="lead">Werk dat wij hebben opgeleverd. Klik op een foto om hem groot te zien.</p>
+        <p class="lead">Werk dat wij hebben opgeleverd. Klik op de voorste foto om hem groot te zien.</p>
       </div>
       <div class="proj-nav">
         <button type="button" class="proj-pijl" data-richting="-1" aria-label="Vorige projecten">{icon("pijl-links")}</button>
         <span class="proj-teller" aria-live="polite"></span>
         <button type="button" class="proj-pijl" data-richting="1" aria-label="Volgende projecten">{icon("pijl-rechts")}</button>
+        <button type="button" class="proj-pauze" aria-pressed="false" aria-label="Pauzeer de carrousel">{icon("pauze").replace('class="ic"', 'class="ic ic-pauze"')}{icon("speel").replace('class="ic"', 'class="ic ic-speel"')}</button>
       </div>
     </div>
     <div class="proj-filter reveal" role="group" aria-label="Toon projecten per soort">{filters}</div>
   </div>
-  <ul class="strook" tabindex="0" aria-label="Projectfoto's, schuif opzij voor meer">{dia}</ul>
+  <ul class="strook" aria-roledescription="carrousel" aria-label="Projectfoto's. Gebruik de pijltjestoetsen of de knoppen om te bladeren.">{dia}</ul>
   <div class="wrap"><div class="proj-draad" aria-hidden="true"><i></i></div>{noot}</div>
   <dialog class="licht" aria-label="Vergrote projectfoto">
     <button type="button" class="licht-sluit" aria-label="Sluiten">Sluiten</button>
@@ -187,6 +190,37 @@ def projecten_html():
   </dialog>
 </section>
 '''
+
+
+def erkenningen_html():
+    """Logo's en keurmerken die de eigenaar in het beheer heeft toegevoegd. Leeg: niets tonen."""
+    items = CONTENT.get("erkenningen", [])
+    if not items:
+        return ""
+    e = html.escape
+    blokken = ""
+    for it in items:
+        logo = f'<img src="{{base}}{it["logo"]}.png" alt="Logo {e(it["naam"])}" loading="lazy">' if it.get("logo") else ""
+        binnen = f'{logo}<div><b>{e(it["naam"])}</b><span>{e(it.get("tekst", ""))}</span></div>'
+        link = it.get("link", "").strip()
+        if link.startswith("https://"):
+            blokken += f'<a class="erkend-item" href="{e(link)}" target="_blank" rel="noopener">{binnen}</a>'
+        else:
+            blokken += f'<div class="erkend-item">{binnen}</div>'
+    return f'''
+<section class="erkend" aria-label="Erkenningen en certificaten">
+  <div class="wrap erkend-grid">
+    <p class="erkend-kop">Erkend en gecertificeerd</p>
+    {blokken}
+  </div>
+</section>
+'''
+
+
+def erkenningen_voet():
+    logos = ''.join(f'<img src="{{base}}{it["logo"]}.png" alt="Logo {html.escape(it["naam"])}" loading="lazy">'
+                    for it in CONTENT.get("erkenningen", []) if it.get("logo"))
+    return f'<div class="foot-erkend">{logos}</div>' if logos else ""
 
 
 class _TekstLezer(HTMLParser):
@@ -405,6 +439,7 @@ def layout(page):
       <div>
         <a class="brand" href="{base or "./"}">{LOGO}<span>Ohand<span>Elektra</span></span></a>
         <p>Zelfstandig elektrotechnisch installatiebedrijf voor laadpalen, thuisbatterijen en elektra. Veilig aangelegd, netjes afgewerkt.</p>
+        {erkenningen_voet().replace("{base}", base)}
       </div>
       <div>
         <h2>Diensten</h2>
@@ -528,6 +563,8 @@ HOME = f'''
     <div>{icon("kast")}<b>Nette afwerking</b><span>strakke bedrading, opgeruimde werkplek</span></div>
   </div>
 </section>
+
+{erkenningen_html()}
 
 <section class="section">
   <div class="wrap">
@@ -1126,6 +1163,9 @@ def main():
     eigen = set()
     for it in CONTENT.get("projecten", []):
         eigen.update([it["titel"], it.get("tekst", ""), it["soort"], it["soort"] + " (voorbeeld)"])
+
+    for it in CONTENT.get("erkenningen", []):
+        eigen.update([it["naam"], it.get("tekst", "")])
 
     def eigen_veld(t):
         # Korte waarden (de plaatsnaam, de bedrijfsnaam) komen ook in gewone zinnen voor:
