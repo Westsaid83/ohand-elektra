@@ -45,6 +45,14 @@ Wat er te beheren is:
   WebP kan maken. De zes eerste projecten zijn sfeerbeelden met
   `"voorbeeld": true`; de site zet er "(voorbeeld)" bij tot de foto is
   vervangen.
+- **Erkenningen**: naam, toelichting, webadres en een logo (PNG, zodat een
+  doorzichtige achtergrond blijft; `images/erkenningen/`). Leeg is niets
+  tonen. Van Said, 26 november 2026: "Vermeld en toon de officiële logo dat
+  Ohand erkend en gecertificeerd NEN is." Het logo en de precieze naam van
+  de erkenning zijn NIET door Claude ingevuld: NEN geeft zelf geen
+  bedrijfscertificaten af en zijn logo is een beschermd merk, dus welk
+  certificaat het is en welk beeldmerk daarbij gevoerd mag worden moet van
+  de eigenaar komen. Voeg hier nooit een logo toe dat van internet is gehaald.
 - **Bedrijfsgegevens**: het blok `bedrijf`. De bel-link wordt uit het getoonde
   nummer afgeleid (`_telefoon_link`).
 - **Vaste foto's**: `FOTO_PLEKKEN` in `build.py`. Een vervangen foto staat in
@@ -112,6 +120,12 @@ blijft. Kleuren, lettertype, teksten, pictogrammen en indeling zijn eigen.
   het raster lezen die lijst. Elk adres met een `#` moet op de doelpagina een
   element met dat id hebben.
 - **Pictogrammen** zijn eigen lijntekeningen in `ICON_PATHS`.
+- **Projectencarrousel** (homepage, `projecten_html()` en het blok in
+  `site.js`): de foto's zweven in een boog en de carrousel draait elke vijf
+  seconden door (Said, 26 november 2026: "automatisch draaien", "3D
+  zwevend"). Hij pauzeert bij de muis erboven, toetsenbordfocus, een open
+  vergroting, een verborgen tabblad en buiten beeld, heeft een pauzeknop, en
+  start niet vanzelf bij "minder beweging". Dat is CSS-3D, geen three.js.
 - **3D** staat alleen nog op de thuisbatterijpagina (kop, configurator en het
   model dat openschuift). `assets/scene.js` tekent het met three.js uit
   `assets/vendor/`; elk `<canvas data-scene="naam">` wordt een model en

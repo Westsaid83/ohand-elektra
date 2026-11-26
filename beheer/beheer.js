@@ -66,6 +66,7 @@
     }).then(function (res) {
       inhoud = JSON.parse(uitBase64(res[0].content));
       inhoud.teksten = inhoud.teksten || {}; inhoud.afbeeldingen = inhoud.afbeeldingen || {}; inhoud.projecten = inhoud.projecten || [];
+      inhoud.erkenningen = inhoud.erkenningen || [];
       bron = res[1];
       localStorage.setItem(OPSLAG, sleutel);
       $('#inlog').hidden = true; $('#app').hidden = false; $('#balk').hidden = false; $('#uitloggen').hidden = false;
@@ -119,6 +120,18 @@
       nieuweBestanden[basis + '-1200.jpg'] = groot.split(',')[1];
       nieuweBestanden[basis + '-640.jpg'] = klein.split(',')[1];
       voorbeelden[basis] = klein;
+      return basis;
+    });
+  }
+  /* Een logo blijft PNG, zodat een doorzichtige achtergrond behouden blijft. */
+  function verwerkLogo(bestand, basis) {
+    return laadFoto(bestand).then(function (foto) {
+      var f = Math.min(1, 480 / Math.max(foto.width, foto.height));
+      var c = document.createElement('canvas'); c.width = Math.round(foto.width * f); c.height = Math.round(foto.height * f);
+      c.getContext('2d').drawImage(foto, 0, 0, c.width, c.height);
+      var url = c.toDataURL('image/png');
+      nieuweBestanden[basis + '.png'] = url.split(',')[1];
+      voorbeelden[basis] = url;
       return basis;
     });
   }
@@ -194,6 +207,42 @@
   ['dragleave', 'drop'].forEach(function (n) { drop.addEventListener(n, function (e) { e.preventDefault(); drop.classList.remove('is-over'); }); });
   drop.addEventListener('drop', function (e) { voegToe(e.dataTransfer.files); });
 
+  /* ---------- Erkenningen ---------- */
+  function tekenErkenningen() {
+    var lijst = $('#erkenningen'); lijst.textContent = '';
+    if (!inhoud.erkenningen.length) lijst.appendChild(el('p', { class: 'uitleg', tekst: 'Er staan nog geen erkenningen. Klik hieronder om er een toe te voegen.' }));
+    inhoud.erkenningen.forEach(function (k, i) {
+      var veld = function (label, naam, tag, hint, extra) {
+        var id = 'e' + i + naam;
+        var inp = el(tag, Object.assign({ id: id, type: tag === 'input' ? 'text' : null, rows: tag === 'textarea' ? 2 : null,
+          oninput: function () { k[naam] = inp.value; markeer(); } }, extra || {}));
+        inp.value = k[naam] || '';
+        return el('div', { class: 'veld' }, [el('label', { for: id, tekst: label }), inp, hint ? el('p', { class: 'hint', tekst: hint }) : null]);
+      };
+      var kies = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/svg+xml,image/webp', class: 'verborgen', id: 'ef' + i, onchange: function () {
+        if (!kies.files[0]) return;
+        verwerkLogo(kies.files[0], uniek('images/erkenningen/e-')).then(function (basis) { k.logo = basis; markeer(); tekenErkenningen(); }).catch(kanNiet);
+      } });
+      lijst.appendChild(el('div', { class: 'kaart project' }, [
+        el('div', {}, [
+          k.logo ? el('img', { class: 'logo', src: voorbeelden[k.logo] || ('../' + k.logo + '.png'), alt: '' }) : el('p', { class: 'uitleg', tekst: 'Nog geen logo gekozen.' }),
+          el('div', { class: 'rij', style: 'margin-top:10px' }, [el('label', { for: 'ef' + i, class: 'knop knop--rand knop--klein', tekst: k.logo ? 'Ander logo' : 'Logo kiezen', style: 'margin:0' }), kies])
+        ]),
+        el('div', {}, [
+          veld('Naam van de erkenning', 'naam', 'input', 'Precies zoals op het certificaat, bijvoorbeeld de naam van het keurmerk of de norm.'),
+          veld('Korte toelichting', 'tekst', 'textarea', 'Eén zin over wat de erkenning inhoudt. Mag leeg blijven.'),
+          veld('Webadres van de instantie', 'link', 'input', 'Mag leeg blijven. Begint met https://', { placeholder: 'https://' }),
+          el('div', { class: 'rij' }, [
+            el('button', { type: 'button', class: 'knop knop--rood knop--klein', tekst: 'Verwijderen', onclick: function () {
+              if (confirm('Erkenning "' + (k.naam || 'zonder naam') + '" verwijderen?')) { inhoud.erkenningen.splice(i, 1); markeer(); tekenErkenningen(); }
+            } })
+          ])
+        ])
+      ]));
+    });
+  }
+  $('#erkenning-nieuw').addEventListener('click', function () { inhoud.erkenningen.push({ naam: '', tekst: '', link: '', logo: '' }); markeer(); tekenErkenningen(); });
+
   /* ---------- Bedrijfsgegevens ---------- */
   var VELDEN = [
     ['naam', 'Bedrijfsnaam', 'text', ''],
@@ -268,7 +317,7 @@
   }
   $('#zoek').addEventListener('input', tekenTeksten);
 
-  function tekenAlles() { tekenProjecten(); tekenGegevens(); tekenPlekken(); tekenTeksten(); }
+  function tekenAlles() { tekenProjecten(); tekenGegevens(); tekenErkenningen(); tekenPlekken(); tekenTeksten(); }
 
   /* ---------- Opslaan: alles in één keer, zodat de website één keer opnieuw bouwt ---------- */
   function controleer() {
@@ -276,6 +325,10 @@
     if ((inhoud.bedrijf.telefoon || '').replace(/\D/g, '').length < 9) return 'Het telefoonnummer bij Bedrijfsgegevens is te kort.';
     var leeg = inhoud.projecten.filter(function (p) { return !p.titel.trim() || !p.soort.trim(); }).length;
     if (leeg) return leeg + ' project(en) hebben nog geen titel of soort werk. Vul die in bij Projecten.';
+    var zonderNaam = inhoud.erkenningen.filter(function (k) { return !(k.naam || '').trim(); }).length;
+    if (zonderNaam) return zonderNaam + ' erkenning(en) hebben nog geen naam. Vul die in bij Erkenningen of verwijder ze.';
+    var foutLink = inhoud.erkenningen.filter(function (k) { return (k.link || '').trim() && (k.link || '').trim().indexOf('https://') !== 0; }).length;
+    if (foutLink) return 'Een webadres bij Erkenningen moet beginnen met https://';
     return null;
   }
   $('#opslaan').addEventListener('click', function () {
@@ -284,8 +337,9 @@
     if (fout) { status.className = 'fout'; status.textContent = fout; return; }
     knop.disabled = true; status.className = ''; status.textContent = 'Bezig met opslaan...';
     // Alleen foto's die nog ergens gebruikt worden gaan mee.
-    var inGebruik = inhoud.projecten.map(function (p) { return p.foto; }).concat(Object.keys(inhoud.afbeeldingen).map(function (k) { return inhoud.afbeeldingen[k]; }));
-    var paden = Object.keys(nieuweBestanden).filter(function (pad) { return inGebruik.indexOf(pad.replace(/-(1200|640)\.jpg$/, '')) !== -1; });
+    var inGebruik = inhoud.projecten.map(function (p) { return p.foto; }).concat(Object.keys(inhoud.afbeeldingen).map(function (k) { return inhoud.afbeeldingen[k]; }))
+      .concat(inhoud.erkenningen.map(function (k) { return k.logo; }));
+    var paden = Object.keys(nieuweBestanden).filter(function (pad) { return inGebruik.indexOf(pad.replace(/(-(1200|640)\.jpg|\.png)$/, '')) !== -1; });
     var hoofd, boom;
     gh('/git/ref/heads/' + TAK).then(function (ref) {
       hoofd = ref.object.sha;
