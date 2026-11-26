@@ -39,7 +39,7 @@
     {
       "titel": "Laadpaal op de oprit",
       "soort": "Laadpaal",
-      "tekst": "Laadpunt van 11 kW op een 3-fase aansluiting.",
+      "tekst": "Laadpunt van 11 kW op een 3-fase aansluiting, met load balancing.",
       "foto": "images/projecten/voorbeeld-laadpaal-oprit",
       "voorbeeld": true
     },
